@@ -5,9 +5,31 @@
 
 (enable-console-print!)
 
-(println "Hello Console!")
+(def styles
+  (garden/css
+    [:.app-view
+       [:.card
+        {:width "100px"
+         :height "100px"
+         :border "1px solid black"}]]))
 
-(defn app-view [] [:div "Hello World!"])
+(def state
+  {:words [{:text "apple" :translation "manzana"}
+           {:text "orange" :translation "naranja"}
+           {:text "pear" :translation "pera"}
+           {:text "banana" :translation "banana"}]})
+
+(defn app-view []
+      [:div.app-view
+         [:style styles]
+
+        (let [random-word (rand-nth (state :words))]
+         [:div.prompt.card
+          (:translation random-word)])
+
+        (for [word (state :words)]
+             [:div.word.card
+              (word :text)])])
 
 (r/render
   [app-view]
