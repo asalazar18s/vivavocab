@@ -18,18 +18,22 @@
            {:text "orange" :translation "naranja"}
            {:text "pear" :translation "pera"}
            {:text "banana" :translation "banana"}]})
+(defn words-view []
+  [:div.words-view
+   (for [word (state :words)]
+     [:div.word.card
+      (word :text)])])
+
+(defn prompt-view []
+  (let [random-word (rand-nth (state :words))]
+    [:div.prompt.card
+     (:translation random-word)]))
 
 (defn app-view []
   [:div.app-view
    [:style styles]
-
-   (let [random-word (rand-nth (state :words))]
-     [:div.prompt.card
-      (:translation random-word)])
-
-   (for [word (state :words)]
-     [:div.word.card
-      (word :text)])])
+   [prompt-view]
+   [words-view]])
 
 (r/render
   [app-view]
