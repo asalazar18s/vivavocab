@@ -7,7 +7,9 @@
                                    register-sub
                                    dispatch
                                    dispatch-sync
-                                   subscribe]]))
+                                   subscribe
+                                   after]]
+            [schema.core :as s]))
 
 (enable-console-print!)
 
@@ -17,8 +19,22 @@
            {:text "pear" :translation "pera"}
            {:text "banana" :translation "banana"}]})
 
+(def schema
+  {:words [{:text s/Str :translation s/Str}]})
+
+(defn valid-schema?
+  "validate the given state, writing any problems to console.error"
+  [state]
+  (let [res (s/check schema state)]
+    (if (some? res)
+      (.error js/console (str "schema problem: " res)))))
+
+(def middleware
+  [(after valid-schema?)])
+
 (register-handler
   :initialize
+  middleware
   (fn [state _]
     (merge state initial-state)))
 
