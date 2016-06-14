@@ -35,6 +35,8 @@
    [prompt-view]
    [words-view]])
 
-(r/render
-  [app-view]
-  (js/document.getElementById "app"))
+(defn ^:export run
+  []
+  (r/render
+    [app-view]
+    (js/document.getElementById "app")))
