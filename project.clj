@@ -11,7 +11,7 @@
 
   :cljsbuild {:builds
               [{:id "dev"
-                :figwheel true
+                :figwheel {:on-jsload "vivavocab.core/reload"}
                 :source-paths ["src"]
                 :compiler {:main vivavocab.core
                            :asset-path "/js/dev"
