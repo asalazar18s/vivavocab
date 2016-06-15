@@ -47,9 +47,7 @@
   (fn [state _]
       (merge state initial-state)))
 
-(register-handler
-  :guess
-  (fn [state [_ choice-id]]
+(defn update-choice-status [state choice-id]
       (let [prompt-id (get-in state [:question :prompt])
             result (= prompt-id choice-id)
             choices (get-in state [:question :choices])
@@ -57,7 +55,38 @@
                                            (when (= (choice :id) choice-id)
                                                  i))
                                        choices))]
-           (assoc-in state [:question :choices index :correct?] result))))
+           (assoc-in state [:question :choices index :correct?] result)))
+
+(defn set-new-words [state]
+      (let [choice-ids (->> state
+                            :words
+                            keys
+                            shuffle
+                            (take 4)
+                            vec)
+            prompt-id (->> choice-ids
+                           shuffle
+                           first)]
+           (-> state
+               (assoc-in [:question :prompt] prompt-id)
+               (assoc-in [:question :choices 0] {:id (choice-ids 0) :correct? nil})
+               (assoc-in [:question :choices 1] {:id (choice-ids 1) :correct? nil})
+               (assoc-in [:question :choices 2] {:id (choice-ids 2) :correct? nil})
+               (assoc-in [:question :choices 3] {:id (choice-ids 3) :correct? nil}))))
+
+(defn maybe-set-new-words [state choice-id]
+      (let [prompt-id (get-in state [:question :prompt])
+            correct? (= prompt-id choice-id)]
+      (if correct?
+        (set-new-words state)
+        state)))
+
+(register-handler
+  :guess
+  (fn [state [_ choice-id]]
+      (-> state
+          (update-choice-status choice-id)
+          (maybe-set-new-words choice-id))))
 
 ; subscribe functions
 
