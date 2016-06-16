@@ -29,7 +29,13 @@
                         {:id 9 :correct? nil}]}})
 
 (def schema
-  {:words [{:text s/Str :translation s/Str}]})
+  {:words {s/Num {:id s/Num
+                  :text s/Str
+                  :translation s/Str}}
+   :progress s/Num
+   :question {:prompt s/Num
+              :choices [{:id s/Num
+                         :correct? (s/maybe s/Bool)}]}})
 
 (defn valid-schema?
       "validate the given state, writing any problems to console.error"
