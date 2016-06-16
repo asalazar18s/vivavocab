@@ -76,19 +76,17 @@
                (assoc-in [:question :choices 2] {:id (choice-ids 2) :correct? nil})
                (assoc-in [:question :choices 3] {:id (choice-ids 3) :correct? nil}))))
 
-(defn maybe-set-new-words [state choice-id]
+(defn update-progress [state]
+      (let [progress (state :progress)]
+           (assoc-in state [:progress] (+ progress 0.1))))
+
+(defn update-when-correct [state choice-id]
       (let [prompt-id (get-in state [:question :prompt])
             correct? (= prompt-id choice-id)]
-      (if correct?
-        (set-new-words state)
-        state)))
-
-(defn maybe-update-progress [state choice-id]
-      (let [prompt-id (get-in state [:question :prompt])
-            correct? (= prompt-id choice-id)
-            progress (state :progress)]
            (if correct?
-             (assoc-in state [:progress] (+ progress 0.1))
+             (-> state
+                 update-progress
+                 set-new-words)
              state)))
 
 (register-handler
@@ -96,8 +94,7 @@
   (fn [state [_ choice-id]]
       (-> state
           (update-choice-status choice-id)
-          (maybe-update-progress choice-id)
-          (maybe-set-new-words choice-id))))
+          (update-when-correct choice-id))))
 
 ; subscribe functions
 
