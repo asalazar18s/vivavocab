@@ -20,6 +20,8 @@
            9 {:id 9 :text "banana" :translation "banana"}
            10 {:id 10 :text "papaya" :translation "papaya"}}
 
+   :progress 0
+
    :question {:prompt 1
               :choices [{:id 1 :correct? nil}
                         {:id 5 :correct? nil}
@@ -81,11 +83,20 @@
         (set-new-words state)
         state)))
 
+(defn maybe-update-progress [state choice-id]
+      (let [prompt-id (get-in state [:question :prompt])
+            correct? (= prompt-id choice-id)
+            progress (state :progress)]
+           (if correct?
+             (assoc-in state [:progress] (+ progress 0.1))
+             state)))
+
 (register-handler
   :guess
   (fn [state [_ choice-id]]
       (-> state
           (update-choice-status choice-id)
+          (maybe-update-progress choice-id)
           (maybe-set-new-words choice-id))))
 
 ; subscribe functions
@@ -100,11 +111,24 @@
   (fn [state _]
       (reaction (@state :words))))
 
+(register-sub
+  :progress
+  (fn [state _]
+      (reaction (@state :progress))))
+
 ; styles
 
 (def styles
   (garden/css
     [:.app-view
+     [:.progress-bar
+      {:width "100%"
+       :height "80px"
+       :background "grey"}
+      [:.progress
+       {:height "100%"
+        :background "green"
+        :transition "width 0.5s ease-in-out"}]]
      [:.prompt
       {:background "white"
        :width "120px"
@@ -157,9 +181,17 @@
                [:div.prompt.card
                 (:translation (@words (@question :prompt)))])))
 
+(defn progress-bar-view []
+      (let [progress (subscribe [:progress])]
+           (fn []
+               [:div.progress-bar
+                [:div.progress {:style {:width (str (* @progress 100) "%")}}]])))
+
+
 (defn app-view []
       [:div.app-view
        [:style styles]
+       [progress-bar-view]
        [prompt-view]
        [words-view]])
 
