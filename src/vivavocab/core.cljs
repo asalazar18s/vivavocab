@@ -105,10 +105,29 @@
 (def styles
   (garden/css
     [:.app-view
-     [:.card
-      {:width  "100px"
-       :height "100px"
-       :border "1px solid black"}
+     [:.prompt
+      {:background "white"
+       :width "120px"
+       :height "120px"
+       :border "3px solid black"
+       :font-size "22px"
+       :font-family "Arial"
+       :line-height "120px"
+       :margin "auto"
+       :text-align "center"
+       :text-transform "uppercase"}]
+     [:.choice
+      {:background "cyan"
+       :width "80px"
+       :height "80px"
+       :border "2px dashed black"
+       :font-style "italic"
+       :font-size "16px"
+       :font-family "Helvetica"
+       :line-height "80px"
+       :float "left"
+       :margin "50px 75px 0"
+       :text-align "center"}
       [:&.incorrect
        {:background "red"}]
       [:&.correct
@@ -122,12 +141,13 @@
            (fn []
                [:div.words-view
                 (for [word (@question :choices)]
-                     [:div.word.card {:class (case (word :correct?)
-                                                   true "correct"
-                                                   false "incorrect"
-                                                   nil "")
-                                      :on-click (fn []
-                                                    (dispatch [:guess (word :id)]))}
+                     [:div.choice.card
+                      {:class (case (word :correct?)
+                                    true "correct"
+                                    false "incorrect"
+                                    nil "")
+                       :on-click (fn []
+                                     (dispatch [:guess (word :id)]))}
                       (:text (@words (word :id)))])])))
 
 (defn prompt-view []
