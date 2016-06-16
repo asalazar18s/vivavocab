@@ -77,8 +77,7 @@
                (assoc-in [:question :choices 3] {:id (choice-ids 3) :correct? nil}))))
 
 (defn update-progress [state]
-      (let [progress (state :progress)]
-           (assoc-in state [:progress] (+ progress 0.1))))
+      (update-in state [:progress] + 0.1))
 
 (defn update-when-correct [state choice-id]
       (let [prompt-id (get-in state [:question :prompt])
