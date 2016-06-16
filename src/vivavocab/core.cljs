@@ -166,15 +166,17 @@
             words (subscribe [:words])]
            (fn []
                [:div.words-view
-                (for [word (@question :choices)]
-                     [:div.choice.card
-                      {:class (case (word :correct?)
-                                    true "correct"
-                                    false "incorrect"
-                                    nil "")
-                       :on-click (fn []
-                                     (dispatch [:guess (word :id)]))}
-                      (:text (@words (word :id)))])])))
+                (doall
+                  (for [word (@question :choices)]
+                       ^{:key (word :id)}
+                       [:div.choice.card
+                        {:class (case (word :correct?)
+                                      true "correct"
+                                      false "incorrect"
+                                      nil "")
+                         :on-click (fn []
+                                       (dispatch [:guess (word :id)]))}
+                        (:text (@words (word :id)))]))])))
 
 (defn prompt-view []
       (let [question (subscribe [:question])
