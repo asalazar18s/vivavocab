@@ -122,11 +122,25 @@
 
 (def styles
   (garden/css
+    [:body
+     {:margin "0"
+      :padding "0"}]
     [:.app-view
+     [:.background
+      {:background "url(/episodes/farmer/bg.png) repeat-y"
+       :position "absolute"
+       :width "100vw"
+       :height "100vh"
+       :top 0
+       :left 0
+       }]
      [:.progress-bar
       {:width "100%"
        :height "80px"
-       :background "grey"}
+       :background "grey"
+       :position "absolute"
+       :top 0
+       :left 0}
       [:.progress
        {:height "100%"
         :background "green"
@@ -141,23 +155,30 @@
        :line-height "120px"
        :margin "auto"
        :text-align "center"
-       :text-transform "uppercase"}]
-     [:.choice
-      {:background "cyan"
-       :width "80px"
-       :height "80px"
-       :border "2px dashed black"
-       :font-style "italic"
-       :font-size "16px"
-       :font-family "Helvetica"
-       :line-height "80px"
-       :float "left"
-       :margin "50px 75px 0"
-       :text-align "center"}
-      [:&.incorrect
-       {:background "red"}]
-      [:&.correct
-       {:background "green"}]]]))
+       :text-transform "uppercase"
+       :position "absolute"
+       :top "20%"
+       :left "50%"}]
+     [:.words-view
+      {:position "absolute"
+       :bottom 0
+       :left 0}
+      [:.choice
+       {:background "cyan"
+        :width "80px"
+        :height "80px"
+        :border "2px dashed black"
+        :font-style "italic"
+        :font-size "16px"
+        :font-family "Helvetica"
+        :line-height "80px"
+        :float "left"
+        :margin "50px 75px 0"
+        :text-align "center"}
+       [:&.incorrect
+        {:background "red"}]
+       [:&.correct
+        {:background "green"}]]]]))
 
 ; views
 
@@ -195,6 +216,7 @@
 (defn app-view []
       [:div.app-view
        [:style styles]
+       [:div.background]
        [progress-bar-view]
        [prompt-view]
        [words-view]])
