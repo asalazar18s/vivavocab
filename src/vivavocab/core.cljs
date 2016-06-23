@@ -145,20 +145,25 @@
        {:height "100%"
         :background "green"
         :transition "width 0.5s ease-in-out"}]]
-     [:.prompt
-      {:background "white"
-       :width "120px"
-       :height "120px"
-       :border "3px solid black"
-       :font-size "22px"
-       :font-family "Arial"
-       :line-height "120px"
-       :margin "auto"
-       :text-align "center"
-       :text-transform "uppercase"
+     [:.prompt-background
+      {:background-image "url(/episodes/farmer/prompt_bg.png)"
+       :background-size "contain"
+       :width (str (* 480 0.5) "px")
+       :height (str (* 671 0.5) "px")
        :position "absolute"
-       :top "20%"
-       :left "50%"}]
+       :padding-top "140px"
+       :box-sizing "border-box"
+       :top "9%"
+       :left "50%"}
+      [:.prompt
+       {:font-size "22px"
+        :font-family "Arial"
+        :line-height "120px"
+        :width "120px"
+        :height "120px"
+        :margin "auto"
+        :text-align "center"
+        :text-transform "uppercase"}]]
      [:.words-view
       {:position "absolute"
        :bottom 0
@@ -203,8 +208,9 @@
       (let [question (subscribe [:question])
             words (subscribe [:words])]
            (fn []
-               [:div.prompt.card
-                (:translation (@words (@question :prompt)))])))
+               [:div.prompt-background
+                [:div.prompt
+                  (:translation (@words (@question :prompt)))]])))
 
 (defn progress-bar-view []
       (let [progress (subscribe [:progress])]
