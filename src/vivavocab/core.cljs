@@ -9,6 +9,7 @@
                                    dispatch-sync
                                    subscribe
                                    after]]
+            [reanimated.core :as anim]
             [schema.core :as s]))
 
 (enable-console-print!)
@@ -175,8 +176,7 @@
        :left 0}
       [:.progress
        {:height "100%"
-        :background "green"
-        :transition "width 0.5s ease-in-out"}]]
+        :background "green"}]]
      [:.prompt-background
       {:background-image "url(/episodes/farmer/prompt_bg.png)"
        :background-size "contain"
@@ -243,10 +243,11 @@
                   (:translation (@words (@question :prompt)))]])))
 
 (defn progress-bar-view []
-      (let [progress (subscribe [:progress])]
+      (let [progress (subscribe [:progress])
+            progress-anim (anim/interpolate-to progress {:duration 500})]
            (fn []
-               [:div.progress-bar
-                [:div.progress {:style {:width (str (* @progress 100) "%")}}]])))
+             [:div.progress-bar
+              [:div.progress {:style {:width (str (* @progress-anim 100) "%")}}]])))
 
 (defn character-view []
       (let [mood (subscribe [:character-mood])]
