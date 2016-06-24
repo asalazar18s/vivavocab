@@ -9,6 +9,7 @@
                                    dispatch-sync
                                    subscribe
                                    after]]
+            [reanimated.core :as anim]
             [schema.core :as s]))
 
 (enable-console-print!)
@@ -35,6 +36,7 @@
                   :text s/Str
                   :translation s/Str}}
    :progress s/Num
+   :character-mood (s/enum :neutral :happy :angry)
    :question {:prompt s/Num
               :choices [{:id s/Num
                          :correct? (s/maybe s/Bool)}]}})
@@ -140,7 +142,7 @@
     [:body
      {:margin "0"
       :padding "0"}]
-    [:.app-view
+    [:.app
      [:.floor
       {:background-image "url(/episodes/farmer/floor.png)"
        :position "absolute"
@@ -175,8 +177,7 @@
        :left 0}
       [:.progress
        {:height "100%"
-        :background "green"
-        :transition "width 0.5s ease-in-out"}]]
+        :background "green"}]]
      [:.prompt-background
       {:background-image "url(/episodes/farmer/prompt_bg.png)"
        :background-size "contain"
@@ -195,7 +196,7 @@
         :height "120px"
         :margin "auto"
         :text-align "center"}]]
-     [:.words-view
+     [:.choices
       {:position "absolute"
        :bottom "2.5vw"
        :left 0
@@ -217,22 +218,25 @@
 
 ; views
 
-(defn words-view []
+(defn choice-view [word]
+  [:div.choice.card
+   {:class (case (word :correct?)
+             true "correct"
+             false "incorrect"
+             nil "")
+    :on-click (fn []
+                (dispatch [:guess (word :id)]))}
+   (:text word)])
+
+(defn choices-view []
       (let [question (subscribe [:question])
             words (subscribe [:words])]
            (fn []
-               [:div.words-view
+               [:div.choices
                 (doall
-                  (for [word (@question :choices)]
-                       ^{:key (word :id)}
-                       [:div.choice.card
-                        {:class (case (word :correct?)
-                                      true "correct"
-                                      false "incorrect"
-                                      nil "")
-                         :on-click (fn []
-                                       (dispatch [:guess (word :id)]))}
-                        (:text (@words (word :id)))]))])))
+                  (for [choice (@question :choices)]
+                       ^{:key (choice :id)}
+                       [choice-view (@words (choice :id))]))])))
 
 (defn prompt-view []
       (let [question (subscribe [:question])
@@ -243,10 +247,11 @@
                   (:translation (@words (@question :prompt)))]])))
 
 (defn progress-bar-view []
-      (let [progress (subscribe [:progress])]
+      (let [progress (subscribe [:progress])
+            progress-anim (anim/interpolate-to progress {:duration 500})]
            (fn []
-               [:div.progress-bar
-                [:div.progress {:style {:width (str (* @progress 100) "%")}}]])))
+             [:div.progress-bar
+              [:div.progress {:style {:width (str (* @progress-anim 100) "%")}}]])))
 
 (defn character-view []
       (let [mood (subscribe [:character-mood])]
@@ -261,14 +266,14 @@
           [:div.floor]))
 
 (defn app-view []
-      [:div.app-view
+      [:div.app
        [:style styles]
        [:div.background]
        [character-view]
        [progress-bar-view]
        [prompt-view]
        [floor-view]
-       [words-view]])
+       [choices-view]])
 
 ; run functions
 

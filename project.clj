@@ -3,7 +3,8 @@
                  [org.clojure/clojurescript "1.9.36"]
                  [re-frame "0.7.0"]
                  [garden "1.3.2"]
-                 [prismatic/schema "1.1.2"]]
+                 [prismatic/schema "1.1.2"]
+                 [timothypratley/reanimated "0.3.0"]]
 
   :plugins [[lein-figwheel "0.5.4-2"]]
 
