@@ -126,6 +126,11 @@
       (reaction (@state :words))))
 
 (register-sub
+  :word
+  (fn [state [_ id]]
+      (reaction (get-in @state [:words id]))))
+
+(register-sub
   :progress
   (fn [state _]
       (reaction (@state :progress))))
@@ -218,25 +223,26 @@
 
 ; views
 
-(defn choice-view [word]
-  [:div.choice.card
-   {:class (case (word :correct?)
-             true "correct"
-             false "incorrect"
-             nil "")
-    :on-click (fn []
-                (dispatch [:guess (word :id)]))}
-   (:text word)])
+(defn choice-view [choice]
+  (let [word (subscribe [:word (choice :id)])]
+    (fn [choice]
+      [:div.choice.card
+       {:class (case (choice :correct?)
+                 true "correct"
+                 false "incorrect"
+                 nil "")
+        :on-click (fn []
+                    (dispatch [:guess (choice :id)]))}
+       (@word :text)])))
 
 (defn choices-view []
-      (let [question (subscribe [:question])
-            words (subscribe [:words])]
+      (let [question (subscribe [:question])]
            (fn []
                [:div.choices
                 (doall
                   (for [choice (@question :choices)]
-                       ^{:key (choice :id)}
-                       [choice-view (@words (choice :id))]))])))
+                    ^{:key (choice :id)}
+                    [choice-view choice]))])))
 
 (defn prompt-view []
       (let [question (subscribe [:question])
