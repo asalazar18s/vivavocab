@@ -141,7 +141,7 @@
     [:body
      {:margin "0"
       :padding "0"}]
-    [:.app-view
+    [:.app
      [:.floor
       {:background-image "url(/episodes/farmer/floor.png)"
        :position "absolute"
@@ -195,7 +195,7 @@
         :height "120px"
         :margin "auto"
         :text-align "center"}]]
-     [:.choices-view
+     [:.choices
       {:position "absolute"
        :bottom "2.5vw"
        :left 0
@@ -231,7 +231,7 @@
       (let [question (subscribe [:question])
             words (subscribe [:words])]
            (fn []
-               [:div.choices-view
+               [:div.choices
                 (doall
                   (for [choice (@question :choices)]
                        ^{:key (choice :id)}
@@ -265,7 +265,7 @@
           [:div.floor]))
 
 (defn app-view []
-      [:div.app-view
+      [:div.app
        [:style styles]
        [:div.background]
        [character-view]
