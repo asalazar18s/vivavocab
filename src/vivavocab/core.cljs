@@ -36,6 +36,7 @@
                   :text s/Str
                   :translation s/Str}}
    :progress s/Num
+   :character-mood (s/enum :neutral :happy :angry)
    :question {:prompt s/Num
               :choices [{:id s/Num
                          :correct? (s/maybe s/Bool)}]}})
