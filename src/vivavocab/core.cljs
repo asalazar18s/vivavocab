@@ -141,6 +141,12 @@
      {:margin "0"
       :padding "0"}]
     [:.app-view
+     [:.floor
+      {:background-image "url(/episodes/farmer/floor.png)"
+       :position "absolute"
+       :height "20vh"
+       :width "100vw"
+       :bottom "0"}]
      [:.character
       {:background-image "url(/episodes/farmer/char_neutral.png)"
        :background-size "contain"
@@ -252,6 +258,9 @@
                          :happy "happy"
                          :angry "angry"
                          :neutral "")}])))
+(defn floor-view[]
+      (fn []
+          [:div.floor]))
 
 (defn app-view []
       [:div.app-view
@@ -260,6 +269,7 @@
        [character-view]
        [progress-bar-view]
        [prompt-view]
+       [floor-view]
        [words-view]])
 
 ; run functions
