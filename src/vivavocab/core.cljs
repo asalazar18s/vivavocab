@@ -194,28 +194,26 @@
         :width "120px"
         :height "120px"
         :margin "auto"
-        :text-align "center"
-        :text-transform "uppercase"}]]
+        :text-align "center"}]]
      [:.words-view
       {:position "absolute"
-       :bottom 0
-       :left 0}
-      [:.choice
-       {:background "cyan"
-        :width "80px"
-        :height "80px"
-        :border "2px dashed black"
-        :font-style "italic"
-        :font-size "16px"
-        :font-family "Helvetica"
-        :line-height "80px"
-        :float "left"
-        :margin "50px 75px 0"
-        :text-align "center"}
-       [:&.incorrect
-        {:background "red"}]
-       [:&.correct
-        {:background "green"}]]]]))
+       :bottom "2.5vw"
+       :left 0
+       :width "100vw"
+       :display "flex"
+       :justify-content "space-around"}
+      (let [size 140]
+           [:.choice
+            {:background-image "url(/images/game/choice_bg.png)"
+             :width (str size "px")
+             :height (str size "px")
+             :font-size "25px"
+             :font-family "Helvetica"
+             :line-height (str size "px")
+             :background-size "contain"
+             :text-align "center"}
+            [:&.incorrect
+             {:background-image "url(/images/game/choice_bg_wrong.png)"}]])]]))
 
 ; views
 
