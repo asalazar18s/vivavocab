@@ -22,6 +22,8 @@
 
    :progress 0
 
+   :character-mood :neutral
+
    :question {:prompt 1
               :choices [{:id 1 :correct? nil}
                         {:id 5 :correct? nil}
@@ -94,11 +96,19 @@
                  set-new-words)
              state)))
 
+(defn update-character-mood [state choice-id]
+      (let [prompt-id (get-in state [:question :prompt])
+            correct? (= prompt-id choice-id)]
+           (assoc-in state [:character-mood] (if correct?
+                                               :happy
+                                               :angry))))
+
 (register-handler
   :guess
   (fn [state [_ choice-id]]
       (-> state
           (update-choice-status choice-id)
+          (update-character-mood choice-id)
           (update-when-correct choice-id))))
 
 ; subscribe functions
@@ -118,6 +128,11 @@
   (fn [state _]
       (reaction (@state :progress))))
 
+(register-sub
+  :character-mood
+  (fn [state _]
+      (reaction (@state :character-mood))))
+
 ; styles
 
 (def styles
@@ -126,14 +141,25 @@
      {:margin "0"
       :padding "0"}]
     [:.app-view
+     [:.character
+      {:background-image "url(/episodes/farmer/char_neutral.png)"
+       :background-size "contain"
+       :width (str (* 664 0.40) "px")
+       :height (str (* 1133 0.40) "px")
+       :position "absolute"
+       :box-sizing "border-box"
+       :top "15%"}
+      [:&.angry
+       {:background-image "url(/episodes/farmer/char_angry.png)"}]
+      [:&.happy
+       {:background-image "url(/episodes/farmer/char_happy.png)"}]]
      [:.background
       {:background "url(/episodes/farmer/bg.png) repeat-y"
        :position "absolute"
        :width "100vw"
        :height "100vh"
        :top 0
-       :left 0
-       }]
+       :left 0}]
      [:.progress-bar
       {:width "100%"
        :height "80px"
@@ -218,11 +244,20 @@
                [:div.progress-bar
                 [:div.progress {:style {:width (str (* @progress 100) "%")}}]])))
 
+(defn character-view []
+      (let [mood (subscribe [:character-mood])]
+      (fn []
+          [:div.character ;create a dispatch? or add it to words-view
+           {:class  (case @mood
+                         :happy "happy"
+                         :angry "angry"
+                         :neutral "")}])))
 
 (defn app-view []
       [:div.app-view
        [:style styles]
        [:div.background]
+       [character-view]
        [progress-bar-view]
        [prompt-view]
        [words-view]])
