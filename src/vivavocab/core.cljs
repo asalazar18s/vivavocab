@@ -195,7 +195,7 @@
         :height "120px"
         :margin "auto"
         :text-align "center"}]]
-     [:.words-view
+     [:.choices-view
       {:position "absolute"
        :bottom "2.5vw"
        :left 0
@@ -227,11 +227,11 @@
                 (dispatch [:guess (word :id)]))}
    (:text word)])
 
-(defn words-view []
+(defn choices-view []
       (let [question (subscribe [:question])
             words (subscribe [:words])]
            (fn []
-               [:div.words-view
+               [:div.choices-view
                 (doall
                   (for [choice (@question :choices)]
                        ^{:key (choice :id)}
@@ -272,7 +272,7 @@
        [progress-bar-view]
        [prompt-view]
        [floor-view]
-       [words-view]])
+       [choices-view]])
 
 ; run functions
 
