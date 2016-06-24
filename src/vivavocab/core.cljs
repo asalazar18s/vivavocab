@@ -250,12 +250,12 @@
 
 (defn character-view []
       (let [mood (subscribe [:character-mood])]
-      (fn []
-          [:div.character ;create a dispatch? or add it to words-view
-           {:class  (case @mood
-                         :happy "happy"
-                         :angry "angry"
-                         :neutral "")}])))
+           (fn []
+               [:div.character
+                {:class  (case @mood
+                               :happy "happy"
+                               :angry "angry"
+                               :neutral "")}])))
 (defn floor-view[]
       (fn []
           [:div.floor]))
