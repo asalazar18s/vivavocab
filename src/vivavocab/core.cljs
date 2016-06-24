@@ -217,22 +217,25 @@
 
 ; views
 
+(defn choice-view [word]
+  [:div.choice.card
+   {:class (case (word :correct?)
+             true "correct"
+             false "incorrect"
+             nil "")
+    :on-click (fn []
+                (dispatch [:guess (word :id)]))}
+   (:text word)])
+
 (defn words-view []
       (let [question (subscribe [:question])
             words (subscribe [:words])]
            (fn []
                [:div.words-view
                 (doall
-                  (for [word (@question :choices)]
-                       ^{:key (word :id)}
-                       [:div.choice.card
-                        {:class (case (word :correct?)
-                                      true "correct"
-                                      false "incorrect"
-                                      nil "")
-                         :on-click (fn []
-                                       (dispatch [:guess (word :id)]))}
-                        (:text (@words (word :id)))]))])))
+                  (for [choice (@question :choices)]
+                       ^{:key (choice :id)}
+                       [choice-view (@words (choice :id))]))])))
 
 (defn prompt-view []
       (let [question (subscribe [:question])
