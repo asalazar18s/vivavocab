@@ -187,14 +187,15 @@
        :box-sizing "border-box"
        :top "9%"
        :left "50%"}
+      (let [size 120]
       [:.prompt
        {:font-size "22px"
         :font-family "Arial"
-        :line-height "120px"
-        :width "120px"
-        :height "120px"
+        :line-height (str size"px")
+        :width (str size"px")
+        :height (str size"px")
         :margin "auto"
-        :text-align "center"}]]
+        :text-align "center"}])]
      [:.words-view
       {:position "absolute"
        :bottom "2.5vw"
