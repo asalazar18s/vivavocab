@@ -9,6 +9,7 @@
                                    dispatch-sync
                                    subscribe
                                    after]]
+            [reanimated.core :as anim]
             [schema.core :as s]))
 
 (enable-console-print!)
@@ -24,7 +25,7 @@
 
    :character-mood :neutral
 
-   :question {:prompt 1
+   :question {:prompt {:id 1}
               :choices [{:id 1 :correct? nil}
                         {:id 5 :correct? nil}
                         {:id 7 :correct? nil}
@@ -35,7 +36,8 @@
                   :text s/Str
                   :translation s/Str}}
    :progress s/Num
-   :question {:prompt s/Num
+   :character-mood (s/enum :neutral :happy :angry)
+   :question {:prompt {:id s/Num}
               :choices [{:id s/Num
                          :correct? (s/maybe s/Bool)}]}})
 
@@ -78,7 +80,7 @@
                            shuffle
                            first)]
            (-> state
-               (assoc-in [:question :prompt] prompt-id)
+               (assoc-in [:question :prompt :id] prompt-id)
                (assoc-in [:question :choices 0] {:id (choice-ids 0) :correct? nil})
                (assoc-in [:question :choices 1] {:id (choice-ids 1) :correct? nil})
                (assoc-in [:question :choices 2] {:id (choice-ids 2) :correct? nil})
@@ -88,7 +90,7 @@
       (update-in state [:progress] + 0.1))
 
 (defn update-when-correct [state choice-id]
-      (let [prompt-id (get-in state [:question :prompt])
+      (let [prompt-id (get-in state [:question :prompt :id])
             correct? (= prompt-id choice-id)]
            (if correct?
              (-> state
@@ -97,7 +99,7 @@
              state)))
 
 (defn update-character-mood [state choice-id]
-      (let [prompt-id (get-in state [:question :prompt])
+      (let [prompt-id (get-in state [:question :prompt :id])
             correct? (= prompt-id choice-id)]
            (assoc-in state [:character-mood] (if correct?
                                                :happy
@@ -119,9 +121,15 @@
       (reaction (@state :question))))
 
 (register-sub
-  :words
+  :prompt-word
   (fn [state _]
-      (reaction (@state :words))))
+      (let [prompt (reaction (get-in @state [:question :prompt]))]
+        (reaction (get-in @state [:words (@prompt :id)])))))
+
+(register-sub
+  :word
+  (fn [state [_ id]]
+      (reaction (get-in @state [:words id]))))
 
 (register-sub
   :progress
@@ -140,7 +148,7 @@
     [:body
      {:margin "0"
       :padding "0"}]
-    [:.app-view
+    [:.app
      [:.floor
       {:background-image "url(/episodes/farmer/floor.png)"
        :position "absolute"
@@ -175,8 +183,7 @@
        :left 0}
       [:.progress
        {:height "100%"
-        :background "green"
-        :transition "width 0.5s ease-in-out"}]]
+        :background "green"}]]
      [:.prompt-background
       {:background-image "url(/episodes/farmer/prompt_bg.png)"
        :background-size "contain"
@@ -196,7 +203,7 @@
         :height (str size"px")
         :margin "auto"
         :text-align "center"}])]
-     [:.words-view
+     [:.choices
       {:position "absolute"
        :bottom "2.5vw"
        :left 0
@@ -218,36 +225,40 @@
 
 ; views
 
-(defn words-view []
-      (let [question (subscribe [:question])
-            words (subscribe [:words])]
+(defn choice-view [choice]
+  (let [word (subscribe [:word (choice :id)])]
+    (fn [choice]
+      [:div.choice.card
+       {:class (case (choice :correct?)
+                 true "correct"
+                 false "incorrect"
+                 nil "")
+        :on-click (fn []
+                    (dispatch [:guess (choice :id)]))}
+       (@word :text)])))
+
+(defn choices-view []
+      (let [question (subscribe [:question])]
            (fn []
-               [:div.words-view
+               [:div.choices
                 (doall
-                  (for [word (@question :choices)]
-                       ^{:key (word :id)}
-                       [:div.choice.card
-                        {:class (case (word :correct?)
-                                      true "correct"
-                                      false "incorrect"
-                                      nil "")
-                         :on-click (fn []
-                                       (dispatch [:guess (word :id)]))}
-                        (:text (@words (word :id)))]))])))
+                  (for [choice (@question :choices)]
+                    ^{:key (choice :id)}
+                    [choice-view choice]))])))
 
 (defn prompt-view []
-      (let [question (subscribe [:question])
-            words (subscribe [:words])]
+      (let [prompt-word (subscribe [:prompt-word])]
            (fn []
                [:div.prompt-background
                 [:div.prompt
-                  (:translation (@words (@question :prompt)))]])))
+                  (:translation @prompt-word)]])))
 
 (defn progress-bar-view []
-      (let [progress (subscribe [:progress])]
+      (let [progress (subscribe [:progress])
+            progress-anim (anim/interpolate-to progress {:duration 500})]
            (fn []
-               [:div.progress-bar
-                [:div.progress {:style {:width (str (* @progress 100) "%")}}]])))
+             [:div.progress-bar
+              [:div.progress {:style {:width (str (* @progress-anim 100) "%")}}]])))
 
 (defn character-view []
       (let [mood (subscribe [:character-mood])]
@@ -262,14 +273,14 @@
           [:div.floor]))
 
 (defn app-view []
-      [:div.app-view
+      [:div.app
        [:style styles]
        [:div.background]
        [character-view]
        [progress-bar-view]
        [prompt-view]
        [floor-view]
-       [words-view]])
+       [choices-view]])
 
 ; run functions
 
