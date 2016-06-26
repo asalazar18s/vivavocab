@@ -15,17 +15,21 @@
 (enable-console-print!)
 
 (def initial-state
-  {:words {1 {:id 1 :text "apple" :translation "manzana"}
-           5 {:id 5 :text "orange" :translation "naranja"}
-           7 {:id 7 :text "pear" :translation "pera"}
-           9 {:id 9 :text "banana" :translation "banana"}
-           10 {:id 10 :text "papaya" :translation "papaya"}}
+  {:words {1 {:id 1 :text "apple" :translation "manzana" :image "apple-image"}
+           5 {:id 5 :text "orange" :translation "naranja" :image "orange-image"}
+           7 {:id 7 :text "pear" :translation "pera" :image "pear-image"}
+           9 {:id 9 :text "banana" :translation "banana" :image "banana-image"}
+           10 {:id 10 :text "papaya" :translation "papaya" :image "papaya-image"}}
 
    :progress 0
 
    :character-mood :neutral
 
+   :key-options #{:text :translation :image}
+
    :question {:prompt {:id 1}
+              :prompt-key :text
+              :choice-key :translation
               :choices [{:id 1 :correct? nil}
                         {:id 5 :correct? nil}
                         {:id 7 :correct? nil}
@@ -76,10 +80,20 @@
                             shuffle
                             (take 4)
                             vec)
-            prompt-id (->> choice-ids
-                           shuffle
-                           first)]
+            prompt-id (-> choice-ids
+                           rand-nth)
+            prompt-key (-> state
+                            :key-options
+                            vec
+                            rand-nth)
+            choice-key (-> state
+                            :key-options
+                           (disj prompt-key)
+                           vec
+                           rand-nth)]
            (-> state
+               (assoc-in [:question :prompt-key] prompt-key)
+               (assoc-in [:question :choice-key] choice-key)
                (assoc-in [:question :prompt :id] prompt-id)
                (assoc-in [:question :choices 0] {:id (choice-ids 0) :correct? nil})
                (assoc-in [:question :choices 1] {:id (choice-ids 1) :correct? nil})
@@ -123,13 +137,15 @@
 (register-sub
   :prompt-word
   (fn [state _]
-      (let [prompt (reaction (get-in @state [:question :prompt]))]
-        (reaction (get-in @state [:words (@prompt :id)])))))
+      (let [prompt-id (reaction (get-in @state [:question :prompt :id]))
+            prompt-key (reaction (get-in @state [:question :prompt-key]))]
+        (reaction (get-in @state [:words @prompt-id @prompt-key])))))
 
 (register-sub
-  :word
+  :choice-word
   (fn [state [_ id]]
-      (reaction (get-in @state [:words id]))))
+      (let [choice-key (reaction (get-in @state [:question :choice-key]))]
+           (reaction (get-in @state [:words id @choice-key])))))
 
 (register-sub
   :progress
@@ -226,7 +242,7 @@
 ; views
 
 (defn choice-view [choice]
-  (let [word (subscribe [:word (choice :id)])]
+  (let [word (subscribe [:choice-word (choice :id)])]
     (fn [choice]
       [:div.choice.card
        {:class (case (choice :correct?)
@@ -235,7 +251,7 @@
                  nil "")
         :on-click (fn []
                     (dispatch [:guess (choice :id)]))}
-       (@word :text)])))
+       @word])))
 
 (defn choices-view []
       (let [question (subscribe [:question])]
@@ -251,7 +267,7 @@
            (fn []
                [:div.prompt-background
                 [:div.prompt
-                  (:translation @prompt-word)]])))
+                  @prompt-word]])))
 
 (defn progress-bar-view []
       (let [progress (subscribe [:progress])
