@@ -29,19 +29,16 @@
 
    :key-options #{:text :translation :image}
 
-   :level-id nil
-
-   :progress 0
-
-   :character-mood :neutral
-
-   :question {:prompt {:id 1}
-              :prompt-key :text
-              :choice-key :translation
-              :choices [{:id 1 :correct? nil}
-                        {:id 5 :correct? nil}
-                        {:id 7 :correct? nil}
-                        {:id 9 :correct? nil}]}})
+   :level {:id nil
+           :progress 0
+           :character-mood :neutral
+           :question {:prompt {:id 1}
+                      :prompt-key :text
+                      :choice-key :translation
+                      :choices [{:id 1 :correct? nil}
+                                {:id 5 :correct? nil}
+                                {:id 7 :correct? nil}
+                                {:id 9 :correct? nil}]}}})
 
 (def schema
   {:words {s/Num {:id s/Num
@@ -72,14 +69,14 @@
       (merge state initial-state)))
 
 (defn update-choice-status [state choice-id]
-      (let [prompt-id (get-in state [:question :prompt])
+      (let [prompt-id (get-in state [:level :question :prompt])
             result (= prompt-id choice-id)
-            choices (get-in state [:question :choices])
+            choices (get-in state [:level :question :choices])
             index (first (keep-indexed (fn [i choice]
                                            (when (= (choice :id) choice-id)
                                                  i))
                                        choices))]
-           (assoc-in state [:question :choices index :correct?] result)))
+           (assoc-in state [:level :question :choices index :correct?] result)))
 
 (defn set-new-words [state]
       (let [choice-ids (->> state
@@ -100,19 +97,19 @@
                            vec
                            rand-nth)]
            (-> state
-               (assoc-in [:question :prompt-key] prompt-key)
-               (assoc-in [:question :choice-key] choice-key)
-               (assoc-in [:question :prompt :id] prompt-id)
-               (assoc-in [:question :choices 0] {:id (choice-ids 0) :correct? nil})
-               (assoc-in [:question :choices 1] {:id (choice-ids 1) :correct? nil})
-               (assoc-in [:question :choices 2] {:id (choice-ids 2) :correct? nil})
-               (assoc-in [:question :choices 3] {:id (choice-ids 3) :correct? nil}))))
+               (assoc-in [:level :question :prompt-key] prompt-key)
+               (assoc-in [:level :question :choice-key] choice-key)
+               (assoc-in [:level :question :prompt :id] prompt-id)
+               (assoc-in [:level :question :choices 0] {:id (choice-ids 0) :correct? nil})
+               (assoc-in [:level :question :choices 1] {:id (choice-ids 1) :correct? nil})
+               (assoc-in [:level :question :choices 2] {:id (choice-ids 2) :correct? nil})
+               (assoc-in [:level :question :choices 3] {:id (choice-ids 3) :correct? nil}))))
 
 (defn update-progress [state]
-      (update-in state [:progress] + 0.1))
+      (update-in state [:level :progress] + 0.1))
 
 (defn update-when-correct [state choice-id]
-      (let [prompt-id (get-in state [:question :prompt :id])
+      (let [prompt-id (get-in state [:level :question :prompt :id])
             correct? (= prompt-id choice-id)]
            (if correct?
              (-> state
@@ -121,9 +118,9 @@
              state)))
 
 (defn update-character-mood [state choice-id]
-      (let [prompt-id (get-in state [:question :prompt :id])
+      (let [prompt-id (get-in state [:level :question :prompt :id])
             correct? (= prompt-id choice-id)]
-           (assoc-in state [:character-mood] (if correct?
+           (assoc-in state [:level :character-mood] (if correct?
                                                :happy
                                                :angry))))
 
@@ -138,37 +135,37 @@
 (register-handler
   :choose-level
   (fn [state [_ level-id]]
-      (assoc-in state [:level-id] level-id)))
+      (assoc-in state [:level :id] level-id)))
 
 ; subscribe functions
 
 (register-sub
   :question
   (fn [state _]
-      (reaction (@state :question))))
+      (reaction (get-in @state [:level :question]))))
 
 (register-sub
   :prompt-word
   (fn [state _]
-      (let [prompt-id (reaction (get-in @state [:question :prompt :id]))
-            prompt-key (reaction (get-in @state [:question :prompt-key]))]
+      (let [prompt-id (reaction (get-in @state [:level :question :prompt :id]))
+            prompt-key (reaction (get-in @state [:level :question :prompt-key]))]
         (reaction (get-in @state [:words @prompt-id @prompt-key])))))
 
 (register-sub
   :choice-word
   (fn [state [_ id]]
-      (let [choice-key (reaction (get-in @state [:question :choice-key]))]
+      (let [choice-key (reaction (get-in @state [:level :question :choice-key]))]
            (reaction (get-in @state [:words id @choice-key])))))
 
 (register-sub
   :progress
   (fn [state _]
-      (reaction (@state :progress))))
+      (reaction (get-in @state [:level :progress]))))
 
 (register-sub
   :character-mood
   (fn [state _]
-      (reaction (@state :character-mood))))
+      (reaction (get-in @state [:level :character-mood]))))
 
 (register-sub
   :levels
@@ -178,7 +175,7 @@
 (register-sub
   :level-id
   (fn [state _]
-      (reaction (@state :level-id))))
+      (reaction (get-in @state [:level :id]))))
 
 ; styles
 
