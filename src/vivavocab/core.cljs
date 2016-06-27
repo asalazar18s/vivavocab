@@ -29,16 +29,7 @@
 
    :key-options #{:text :translation :image}
 
-   :level {:id nil
-           :progress 0
-           :character-mood :neutral
-           :question {:prompt {:id 1}
-                      :prompt-key :text
-                      :choice-key :translation
-                      :choices [{:id 1 :correct? nil}
-                                {:id 5 :correct? nil}
-                                {:id 7 :correct? nil}
-                                {:id 9 :correct? nil}]}}})
+   :level nil})
 
 (def schema
   {:words {s/Num {:id s/Num
@@ -96,14 +87,16 @@
                            (disj prompt-key)
                            vec
                            rand-nth)]
-           (-> state
-               (assoc-in [:level :question :prompt-key] prompt-key)
-               (assoc-in [:level :question :choice-key] choice-key)
-               (assoc-in [:level :question :prompt :id] prompt-id)
-               (assoc-in [:level :question :choices 0] {:id (choice-ids 0) :correct? nil})
-               (assoc-in [:level :question :choices 1] {:id (choice-ids 1) :correct? nil})
-               (assoc-in [:level :question :choices 2] {:id (choice-ids 2) :correct? nil})
-               (assoc-in [:level :question :choices 3] {:id (choice-ids 3) :correct? nil}))))
+
+           (assoc-in state
+                     [:level :question]
+                     {:prompt-key prompt-key
+                      :choice-key choice-key
+                      :prompt {:id prompt-id}
+                      :choices [{:id (choice-ids 0) :correct nil}
+                                {:id (choice-ids 1) :correct nil}
+                                {:id (choice-ids 2) :correct nil}
+                                {:id (choice-ids 3) :correct nil}]})))
 
 (defn update-progress [state]
       (update-in state [:level :progress] + 0.1))
@@ -135,7 +128,11 @@
 (register-handler
   :choose-level
   (fn [state [_ level-id]]
-      (assoc-in state [:level :id] level-id)))
+      (-> state
+          (assoc :level {:id level-id
+                         :progress 0
+                         :character-mood :neutral})
+          (set-new-words))))
 
 ; subscribe functions
 
