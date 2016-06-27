@@ -15,17 +15,25 @@
 (enable-console-print!)
 
 (def initial-state
-  {:words {1 {:id 1 :text "apple" :translation "manzana" :image "apple-image"}
+  {:levels {3 {:id 3 :name "Level 3" :words [1 5 7 9]}
+            4 {:id 4 :name "Level 4" :words [10 12 15 16]}}
+
+   :words {1 {:id 1 :text "apple" :translation "manzana" :image "apple-image"}
            5 {:id 5 :text "orange" :translation "naranja" :image "orange-image"}
            7 {:id 7 :text "pear" :translation "pera" :image "pear-image"}
            9 {:id 9 :text "banana" :translation "banana" :image "banana-image"}
-           10 {:id 10 :text "papaya" :translation "papaya" :image "papaya-image"}}
+           10 {:id 10 :text "papaya" :translation "papaya" :image "papaya-image"}
+           12 {:id 12 :text "papaya" :translation "papaya" :image "papaya-image"}
+           15 {:id 15 :text "papaya" :translation "papaya" :image "papaya-image"}
+           16 {:id 16 :text "papaya" :translation "papaya" :image "papaya-image"}}
+
+   :key-options #{:text :translation :image}
+
+   :level-id nil
 
    :progress 0
 
    :character-mood :neutral
-
-   :key-options #{:text :translation :image}
 
    :question {:prompt {:id 1}
               :prompt-key :text
@@ -127,6 +135,11 @@
           (update-character-mood choice-id)
           (update-when-correct choice-id))))
 
+(register-handler
+  :choose-level
+  (fn [state [_ level-id]]
+      (assoc-in state [:level-id] level-id)))
+
 ; subscribe functions
 
 (register-sub
@@ -156,6 +169,16 @@
   :character-mood
   (fn [state _]
       (reaction (@state :character-mood))))
+
+(register-sub
+  :levels
+  (fn [state _]
+      (reaction (vals (get-in @state [:levels])))))
+
+(register-sub
+  :level-id
+  (fn [state _]
+      (reaction (@state :level-id))))
 
 ; styles
 
@@ -190,6 +213,15 @@
        :height "100vh"
        :top 0
        :left 0}]
+     [:.levels
+      {:background-color "cyan"
+       :position "absolute"
+       :width "100vw"
+       :height "100vh"}
+      [:.level
+       {:width "100px"
+        :height "100px"
+        :border "1px solid black"}]]
      [:.progress-bar
       {:width "100%"
        :height "80px"
@@ -211,14 +243,14 @@
        :top "9%"
        :left "50%"}
       (let [size 120]
-      [:.prompt
-       {:font-size "22px"
-        :font-family "Arial"
-        :line-height (str size"px")
-        :width (str size"px")
-        :height (str size"px")
-        :margin "auto"
-        :text-align "center"}])]
+           [:.prompt
+            {:font-size "22px"
+             :font-family "Arial"
+             :line-height (str size"px")
+             :width (str size"px")
+             :height (str size"px")
+             :margin "auto"
+             :text-align "center"}])]
      [:.choices
       {:position "absolute"
        :bottom "2.5vw"
@@ -284,19 +316,40 @@
                                :happy "happy"
                                :angry "angry"
                                :neutral "")}])))
+
 (defn floor-view[]
       (fn []
           [:div.floor]))
 
-(defn app-view []
-      [:div.app
-       [:style styles]
+(defn level-view [level]
+      [:div.level {:on-click (fn [_]
+                                 (dispatch [:choose-level (level :id)]))}
+       (level :name)])
+
+(defn levels-view []
+      (let [levels (subscribe [:levels])]
+           (fn []
+               [:div.levels
+                (for [level @levels]
+                     [level-view level])])))
+
+(defn game-view[]
+      [:div
        [:div.background]
        [character-view]
        [progress-bar-view]
        [prompt-view]
        [floor-view]
        [choices-view]])
+
+(defn app-view []
+      (let [level-id (subscribe [:level-id])]
+           (fn []
+               [:div.app
+                [:style styles]
+                (if (nil? @level-id)
+                  [levels-view]
+                  [game-view])])))
 
 ; run functions
 
