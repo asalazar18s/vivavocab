@@ -15,21 +15,21 @@
 (enable-console-print!)
 
 (def initial-state
-  {:words {1 {:id 1 :text "apple" :translation "manzana"}
-           5 {:id 5 :text "orange" :translation "naranja"}
-           7 {:id 7 :text "pear" :translation "pera"}
-           9 {:id 9 :text "banana" :translation "banana"}
-           10 {:id 10 :text "papaya" :translation "papaya"}}
+  {:levels {3 {:id 3 :name "Level 3" :word-ids [1 5 7 9 10]}
+            4 {:id 4 :name "Level 4" :word-ids [10 12 15 16]}}
 
-   :progress 0
+   :words {1 {:id 1 :text "apple" :translation "manzana" :image "apple-image"}
+           5 {:id 5 :text "orange" :translation "naranja" :image "orange-image"}
+           7 {:id 7 :text "pear" :translation "pera" :image "pear-image"}
+           9 {:id 9 :text "banana" :translation "banana" :image "banana-image"}
+           10 {:id 10 :text "grapes" :translation "uvas" :image "grapes-image"}
+           12 {:id 12 :text "raspberry" :translation "frambuesa" :image "raspberry-image"}
+           15 {:id 15 :text "tangerine" :translation "mandarina" :image "tangerine-image"}
+           16 {:id 16 :text "pomegranate" :translation "granada" :image "pomegranate-image"}}
 
-   :character-mood :neutral
+   :key-options #{:text :translation :image}
 
-   :question {:prompt {:id 1}
-              :choices [{:id 1 :correct? nil}
-                        {:id 5 :correct? nil}
-                        {:id 7 :correct? nil}
-                        {:id 9 :correct? nil}]}})
+   :level nil})
 
 (def schema
   {:words {s/Num {:id s/Num
@@ -60,37 +60,51 @@
       (merge state initial-state)))
 
 (defn update-choice-status [state choice-id]
-      (let [prompt-id (get-in state [:question :prompt])
+      (let [prompt-id (get-in state [:level :question :prompt])
             result (= prompt-id choice-id)
-            choices (get-in state [:question :choices])
+            choices (get-in state [:level :question :choices])
             index (first (keep-indexed (fn [i choice]
                                            (when (= (choice :id) choice-id)
                                                  i))
                                        choices))]
-           (assoc-in state [:question :choices index :correct?] result)))
+           (assoc-in state [:level :question :choices index :correct?] result)))
 
 (defn set-new-words [state]
-      (let [choice-ids (->> state
-                            :words
-                            keys
+      (let [word-count 4
+            level-id (get-in state [:level :id])
+            choice-ids (->> (get-in state [:levels level-id :word-ids])
                             shuffle
-                            (take 4)
+                            (take word-count)
                             vec)
-            prompt-id (->> choice-ids
-                           shuffle
-                           first)]
-           (-> state
-               (assoc-in [:question :prompt :id] prompt-id)
-               (assoc-in [:question :choices 0] {:id (choice-ids 0) :correct? nil})
-               (assoc-in [:question :choices 1] {:id (choice-ids 1) :correct? nil})
-               (assoc-in [:question :choices 2] {:id (choice-ids 2) :correct? nil})
-               (assoc-in [:question :choices 3] {:id (choice-ids 3) :correct? nil}))))
+            prompt-id (-> choice-ids
+                          rand-nth)
+            prompt-key (-> state
+                           :key-options
+                           vec
+                           rand-nth)
+            choice-key (-> state
+                           :key-options
+                           (disj prompt-key)
+                           vec
+                           rand-nth)]
+
+           (assoc-in state
+                     [:level :question]
+                     {:prompt-key prompt-key
+                      :choice-key choice-key
+                      :prompt {:id prompt-id}
+                      :choices (->> ; (0 1 ...)
+                                    (take word-count (iterate inc 0))
+                                    (map (fn [index]
+                                             {:id (choice-ids index)
+                                              :correct nil}))
+                                    vec)})))
 
 (defn update-progress [state]
-      (update-in state [:progress] + 0.1))
+      (update-in state [:level :progress] + 0.1))
 
 (defn update-when-correct [state choice-id]
-      (let [prompt-id (get-in state [:question :prompt :id])
+      (let [prompt-id (get-in state [:level :question :prompt :id])
             correct? (= prompt-id choice-id)]
            (if correct?
              (-> state
@@ -99,9 +113,9 @@
              state)))
 
 (defn update-character-mood [state choice-id]
-      (let [prompt-id (get-in state [:question :prompt :id])
+      (let [prompt-id (get-in state [:level :question :prompt :id])
             correct? (= prompt-id choice-id)]
-           (assoc-in state [:character-mood] (if correct?
+           (assoc-in state [:level :character-mood] (if correct?
                                                :happy
                                                :angry))))
 
@@ -113,33 +127,54 @@
           (update-character-mood choice-id)
           (update-when-correct choice-id))))
 
+(register-handler
+  :choose-level
+  (fn [state [_ level-id]]
+      (-> state
+          (assoc :level {:id level-id
+                         :progress 0
+                         :character-mood :neutral})
+          (set-new-words))))
+
 ; subscribe functions
 
 (register-sub
   :question
   (fn [state _]
-      (reaction (@state :question))))
+      (reaction (get-in @state [:level :question]))))
 
 (register-sub
   :prompt-word
   (fn [state _]
-      (let [prompt (reaction (get-in @state [:question :prompt]))]
-        (reaction (get-in @state [:words (@prompt :id)])))))
+      (let [prompt-id (reaction (get-in @state [:level :question :prompt :id]))
+            prompt-key (reaction (get-in @state [:level :question :prompt-key]))]
+        (reaction (get-in @state [:words @prompt-id @prompt-key])))))
 
 (register-sub
-  :word
+  :choice-word
   (fn [state [_ id]]
-      (reaction (get-in @state [:words id]))))
+      (let [choice-key (reaction (get-in @state [:level :question :choice-key]))]
+           (reaction (get-in @state [:words id @choice-key])))))
 
 (register-sub
   :progress
   (fn [state _]
-      (reaction (@state :progress))))
+      (reaction (get-in @state [:level :progress]))))
 
 (register-sub
   :character-mood
   (fn [state _]
-      (reaction (@state :character-mood))))
+      (reaction (get-in @state [:level :character-mood]))))
+
+(register-sub
+  :levels
+  (fn [state _]
+      (reaction (vals (get-in @state [:levels])))))
+
+(register-sub
+  :level-id
+  (fn [state _]
+      (reaction (get-in @state [:level :id]))))
 
 ; styles
 
@@ -174,6 +209,15 @@
        :height "100vh"
        :top 0
        :left 0}]
+     [:.levels
+      {:background-color "cyan"
+       :position "absolute"
+       :width "100vw"
+       :height "100vh"}
+      [:.level
+       {:width "100px"
+        :height "100px"
+        :border "1px solid black"}]]
      [:.progress-bar
       {:width "100%"
        :height "80px"
@@ -194,14 +238,15 @@
        :box-sizing "border-box"
        :top "9%"
        :left "50%"}
-      [:.prompt
-       {:font-size "22px"
-        :font-family "Arial"
-        :line-height "120px"
-        :width "120px"
-        :height "120px"
-        :margin "auto"
-        :text-align "center"}]]
+      (let [size 120]
+           [:.prompt
+            {:font-size "22px"
+             :font-family "Arial"
+             :line-height (str size"px")
+             :width (str size"px")
+             :height (str size"px")
+             :margin "auto"
+             :text-align "center"}])]
      [:.choices
       {:position "absolute"
        :bottom "2.5vw"
@@ -225,7 +270,7 @@
 ; views
 
 (defn choice-view [choice]
-  (let [word (subscribe [:word (choice :id)])]
+  (let [word (subscribe [:choice-word (choice :id)])]
     (fn [choice]
       [:div.choice.card
        {:class (case (choice :correct?)
@@ -234,7 +279,7 @@
                  nil "")
         :on-click (fn []
                     (dispatch [:guess (choice :id)]))}
-       (@word :text)])))
+       @word])))
 
 (defn choices-view []
       (let [question (subscribe [:question])]
@@ -250,7 +295,7 @@
            (fn []
                [:div.prompt-background
                 [:div.prompt
-                  (:translation @prompt-word)]])))
+                  @prompt-word]])))
 
 (defn progress-bar-view []
       (let [progress (subscribe [:progress])
@@ -267,19 +312,40 @@
                                :happy "happy"
                                :angry "angry"
                                :neutral "")}])))
+
 (defn floor-view[]
       (fn []
           [:div.floor]))
 
-(defn app-view []
-      [:div.app
-       [:style styles]
+(defn level-view [level]
+      [:div.level {:on-click (fn [_]
+                                 (dispatch [:choose-level (level :id)]))}
+       (level :name)])
+
+(defn levels-view []
+      (let [levels (subscribe [:levels])]
+           (fn []
+               [:div.levels
+                (for [level @levels]
+                     [level-view level])])))
+
+(defn game-view[]
+      [:div
        [:div.background]
        [character-view]
        [progress-bar-view]
        [prompt-view]
        [floor-view]
        [choices-view]])
+
+(defn app-view []
+      (let [level-id (subscribe [:level-id])]
+           (fn []
+               [:div.app
+                [:style styles]
+                (if (nil? @level-id)
+                  [levels-view]
+                  [game-view])])))
 
 ; run functions
 
