@@ -15,8 +15,8 @@
 (enable-console-print!)
 
 (def initial-state
-  {:levels {3 {:id 3 :name "Level 3" :words [1 5 7 9]}
-            4 {:id 4 :name "Level 4" :words [10 12 15 16]}}
+  {:levels {3 {:id 3 :name "Level 3" :word-ids [1 5 7 9 10]}
+            4 {:id 4 :name "Level 4" :word-ids [10 12 15 16]}}
 
    :words {1 {:id 1 :text "apple" :translation "manzana" :image "apple-image"}
            5 {:id 5 :text "orange" :translation "naranja" :image "orange-image"}
@@ -70,20 +70,19 @@
            (assoc-in state [:level :question :choices index :correct?] result)))
 
 (defn set-new-words [state]
-      (let [choice-ids (->> state
-                            :words
-                            keys
+      (let [level-id (get-in state [:level :id])
+            choice-ids (->> (get-in state [:levels level-id :word-ids])
                             shuffle
                             (take 4)
                             vec)
             prompt-id (-> choice-ids
-                           rand-nth)
+                          rand-nth)
             prompt-key (-> state
-                            :key-options
-                            vec
-                            rand-nth)
+                           :key-options
+                           vec
+                           rand-nth)
             choice-key (-> state
-                            :key-options
+                           :key-options
                            (disj prompt-key)
                            vec
                            rand-nth)]
