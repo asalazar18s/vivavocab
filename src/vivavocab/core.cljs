@@ -70,10 +70,11 @@
            (assoc-in state [:level :question :choices index :correct?] result)))
 
 (defn set-new-words [state]
-      (let [level-id (get-in state [:level :id])
+      (let [word-count 4
+            level-id (get-in state [:level :id])
             choice-ids (->> (get-in state [:levels level-id :word-ids])
                             shuffle
-                            (take 4)
+                            (take word-count)
                             vec)
             prompt-id (-> choice-ids
                           rand-nth)
@@ -92,10 +93,12 @@
                      {:prompt-key prompt-key
                       :choice-key choice-key
                       :prompt {:id prompt-id}
-                      :choices [{:id (choice-ids 0) :correct nil}
-                                {:id (choice-ids 1) :correct nil}
-                                {:id (choice-ids 2) :correct nil}
-                                {:id (choice-ids 3) :correct nil}]})))
+                      :choices (->> ; (0 1 ...)
+                                    (take word-count (iterate inc 0))
+                                    (map (fn [index]
+                                             {:id (choice-ids index)
+                                              :correct nil}))
+                                    vec)})))
 
 (defn update-progress [state]
       (update-in state [:level :progress] + 0.1))
