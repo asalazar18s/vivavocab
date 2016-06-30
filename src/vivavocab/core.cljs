@@ -15,8 +15,11 @@
 (enable-console-print!)
 
 (def initial-state
-  {:levels {3 {:id 3 :name "Level 3" :word-ids [1 5 7 9 10]}
-            4 {:id 4 :name "Level 4" :word-ids [10 12 15 16]}}
+  {:episodes {123 {:id 123 :character-sprite "teacher"}
+              456 {:id 456 :character-sprite "farmer"}}
+
+   :levels {3 {:id 3 :name "Level 3" :word-ids [1 5 7 9 10] :episode-id 123}
+            4 {:id 4 :name "Level 4" :word-ids [10 12 15 16] :episode-id 456}}
 
    :words {1 {:id 1 :text "apple" :translation "manzana" :image "apple-image"}
            5 {:id 5 :text "orange" :translation "naranja" :image "orange-image"}
@@ -116,8 +119,8 @@
       (let [prompt-id (get-in state [:level :question :prompt :id])
             correct? (= prompt-id choice-id)]
            (assoc-in state [:level :character-mood] (if correct?
-                                               :happy
-                                               :angry))))
+                                                               :happy
+                                                               :angry))))
 
 (register-handler
   :guess
@@ -167,6 +170,13 @@
       (reaction (get-in @state [:level :character-mood]))))
 
 (register-sub
+  :character-sprite
+  (fn [state _]
+      (let [level-id (reaction (get-in @state [:level :id]))
+            episode-id (reaction (get-in @state [:levels @level-id :episode-id]))]
+           (reaction (get-in @state [:episodes @episode-id :character-sprite])))))
+
+(register-sub
   :levels
   (fn [state _]
       (reaction (vals (get-in @state [:levels])))))
@@ -178,94 +188,97 @@
 
 ; styles
 
-(def styles
-  (garden/css
-    [:body
-     {:margin "0"
-      :padding "0"}]
-    [:.app
-     [:.floor
-      {:background-image "url(/episodes/farmer/floor.png)"
-       :position "absolute"
-       :height "20vh"
-       :width "100vw"
-       :bottom "0"}]
-     [:.character
-      {:background-image "url(/episodes/farmer/char_neutral.png)"
-       :background-size "contain"
-       :width (str (* 664 0.40) "px")
-       :height (str (* 1133 0.40) "px")
-       :position "absolute"
-       :box-sizing "border-box"
-       :top "15%"}
-      [:&.angry
-       {:background-image "url(/episodes/farmer/char_angry.png)"}]
-      [:&.happy
-       {:background-image "url(/episodes/farmer/char_happy.png)"}]]
-     [:.background
-      {:background "url(/episodes/farmer/bg.png) repeat-y"
-       :position "absolute"
-       :width "100vw"
-       :height "100vh"
-       :top 0
-       :left 0}]
-     [:.levels
-      {:background-color "cyan"
-       :position "absolute"
-       :width "100vw"
-       :height "100vh"}
-      [:.level
-       {:width "100px"
-        :height "100px"
-        :border "1px solid black"}]]
-     [:.progress-bar
-      {:width "100%"
-       :height "80px"
-       :background "grey"
-       :position "absolute"
-       :top 0
-       :left 0}
-      [:.progress
-       {:height "100%"
-        :background "green"}]]
-     [:.prompt-background
-      {:background-image "url(/episodes/farmer/prompt_bg.png)"
-       :background-size "contain"
-       :width (str (* 480 0.5) "px")
-       :height (str (* 671 0.5) "px")
-       :position "absolute"
-       :padding-top "140px"
-       :box-sizing "border-box"
-       :top "9%"
-       :left "50%"}
-      (let [size 120]
-           [:.prompt
-            {:font-size "22px"
-             :font-family "Arial"
-             :line-height (str size"px")
-             :width (str size"px")
-             :height (str size"px")
-             :margin "auto"
-             :text-align "center"}])]
-     [:.choices
-      {:position "absolute"
-       :bottom "2.5vw"
-       :left 0
-       :width "100vw"
-       :display "flex"
-       :justify-content "space-around"}
-      (let [size 140]
-           [:.choice
-            {:background-image "url(/images/game/choice_bg.png)"
-             :width (str size "px")
-             :height (str size "px")
-             :font-size "25px"
-             :font-family "Helvetica"
-             :line-height (str size "px")
-             :background-size "contain"
-             :text-align "center"}
-            [:&.incorrect
-             {:background-image "url(/images/game/choice_bg_wrong.png)"}]])]]))
+(defn styles-view []
+      (let [character-sprite (subscribe [:character-sprite])]
+           (fn []
+               [:style
+                (garden/css
+                  [:body
+                   {:margin "0"
+                    :padding "0"}]
+                  [:.app
+                   [:.floor
+                    {:position "absolute"
+                     :background-image (str "url(/episodes/" (str @character-sprite) "/floor.png)")
+                     :height "20vh"
+                     :width "100vw"
+                     :bottom "0"}]
+                   [:.character
+                    {:background-image (str "url(/episodes/" (str @character-sprite) "/char_neutral.png)")
+                     :background-size "contain"
+                     :width (str (* 664 0.40) "px")
+                     :height (str (* 1133 0.40) "px")
+                     :position "absolute"
+                     :box-sizing "border-box"
+                     :top "15%"}
+                    [:&.angry
+                     {:background-image (str "url(/episodes/" (str @character-sprite) "/char_angry.png)")}]
+                    [:&.happy
+                     {:background-image (str "url(/episodes/" (str @character-sprite) "/char_happy.png)")}]]
+                   [:.background
+                    {:background (str "url(/episodes/" (str @character-sprite) "/bg.png)" " repeat-y")
+                     :position "absolute"
+                     :width "100vw"
+                     :height "100vh"
+                     :top 0
+                     :left 0}]
+                   [:.levels
+                    {:background-color "cyan"
+                     :position "absolute"
+                     :width "100vw"
+                     :height "100vh"}
+                    [:.level
+                     {:width "100px"
+                      :height "100px"
+                      :border "1px solid black"}]]
+                   [:.progress-bar
+                    {:width "100%"
+                     :height "80px"
+                     :background "grey"
+                     :position "absolute"
+                     :top 0
+                     :left 0}
+                    [:.progress
+                     {:height "100%"
+                      :background "green"}]]
+                   [:.prompt-background
+                    {:background-image (str "url(/episodes/" (str @character-sprite) "/prompt_bg.png)")
+                     :background-size "contain"
+                     :width (str (* 480 0.5) "px")
+                     :height (str (* 671 0.5) "px")
+                     :position "absolute"
+                     :padding-top "140px"
+                     :box-sizing "border-box"
+                     :top "9%"
+                     :left "50%"}
+                    (let [size 120]
+                         [:.prompt
+                          {:font-size "22px"
+                           :font-family "Arial"
+                           :line-height (str size"px")
+                           :width (str size"px")
+                           :height (str size"px")
+                           :margin "auto"
+                           :text-align "center"}])]
+                   [:.choices
+                    {:position "absolute"
+                     :bottom "2.5vw"
+                     :left 0
+                     :width "100vw"
+                     :display "flex"
+                     :justify-content "space-around"}
+                    (let [size 140]
+                         [:.choice
+                          {:background-image "url(/images/game/choice_bg.png)"
+                           :width (str size "px")
+                           :height (str size "px")
+                           :font-size "25px"
+                           :font-family "Helvetica"
+                           :line-height (str size "px")
+                           :background-size "contain"
+                           :text-align "center"}
+                          [:&.incorrect
+                           {:background-image "url(/images/game/choice_bg_wrong.png)"}]])]])])))
 
 ; views
 
@@ -308,10 +321,11 @@
       (let [mood (subscribe [:character-mood])]
            (fn []
                [:div.character
-                {:class  (case @mood
-                               :happy "happy"
-                               :angry "angry"
-                               :neutral "")}])))
+                {:class
+                 (case @mood
+                       :happy "happy"
+                       :angry "angry"
+                       :neutral "")}])))
 
 (defn floor-view[]
       (fn []
@@ -342,7 +356,7 @@
       (let [level-id (subscribe [:level-id])]
            (fn []
                [:div.app
-                [:style styles]
+                [styles-view]
                 (if (nil? @level-id)
                   [levels-view]
                   [game-view])])))
