@@ -139,6 +139,11 @@
                          :character-mood :neutral})
           (set-new-words))))
 
+(register-handler
+  :back-to-levels
+  (fn [state _]
+      (assoc state :level nil)))
+
 ; subscribe functions
 
 (register-sub
@@ -197,6 +202,11 @@
                    {:margin "0"
                     :padding "0"}]
                   [:.app
+                   [:.back-button
+                    {:position "absolute"
+                     :width "50px"
+                     :height "50px"
+                     :background "red"}]
                    [:.floor
                     {:position "absolute"
                      :background-image (str "url(/episodes/" (str @character-sprite) "/floor.png)")
@@ -343,11 +353,18 @@
                 (for [level @levels]
                      [level-view level])])))
 
+(defn back-button-view []
+      (fn []
+          [:div.back-button
+           {:on-click (fn [_]
+                          (dispatch [:back-to-levels]))}]))
+
 (defn game-view[]
       [:div
        [:div.background]
        [character-view]
        [progress-bar-view]
+       [back-button-view]
        [prompt-view]
        [floor-view]
        [choices-view]])
