@@ -15,8 +15,11 @@
 (enable-console-print!)
 
 (def initial-state
-  {:levels {3 {:id 3 :name "Level 3" :word-ids [1 5 7 9 10] :character-sprite "teacher"}
-            4 {:id 4 :name "Level 4" :word-ids [10 12 15 16] :character-sprite "farmer"}}
+  {:episodes {123 {:id 123 :character-sprite "teacher"}
+              456 {:id 456 :character-sprite "farmer"}}
+
+   :levels {3 {:id 3 :name "Level 3" :word-ids [1 5 7 9 10] :episode-id 123}
+            4 {:id 4 :name "Level 4" :word-ids [10 12 15 16] :episode-id 456}}
 
    :words {1 {:id 1 :text "apple" :translation "manzana" :image "apple-image"}
            5 {:id 5 :text "orange" :translation "naranja" :image "orange-image"}
@@ -169,8 +172,9 @@
 (register-sub
   :character-sprite
   (fn [state _]
-      (let [level-id (reaction (get-in @state [:level :id]))]
-           (reaction (get-in @state [:levels @level-id :character-sprite])))))
+      (let [level-id (reaction (get-in @state [:level :id]))
+            episode-id (reaction (get-in @state [:levels @level-id :episode-id]))]
+           (reaction (get-in @state [:episodes @episode-id :character-sprite])))))
 
 (register-sub
   :levels
