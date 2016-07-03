@@ -373,7 +373,18 @@
 
 (defn win-view []
       (fn []
-          [:div.win-view "WIN!"]))
+          [:div.win-view
+           [:div.character]
+           [:div.bubble
+            [:div.stars
+             [:div.star]
+             [:div.star]
+             [:div.star]]
+            [:div.message]]
+           [:div.buttons
+            [:div.retry]
+            [:div.menu]
+            [:div.next]]]))
 
 (defn game-view[]
       (fn []
