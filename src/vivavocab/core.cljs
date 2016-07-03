@@ -121,6 +121,12 @@
            (assoc-in state [:level :character-mood] (if correct?
                                                                :happy
                                                                :angry))))
+(defn maybe-set-win-state [state]
+      (let [progress (get-in state [:level :progress])]
+           (if (>= progress 1.0)
+             (assoc state :level :end)
+             state)))
+
 
 (register-handler
   :guess
@@ -128,7 +134,8 @@
       (-> state
           (update-choice-status choice-id)
           (update-character-mood choice-id)
-          (update-when-correct choice-id))))
+          (update-when-correct choice-id)
+          (maybe-set-win-state))))
 
 (register-handler
   :choose-level
@@ -187,9 +194,9 @@
       (reaction (vals (get-in @state [:levels])))))
 
 (register-sub
-  :level-id
+  :level
   (fn [state _]
-      (reaction (get-in @state [:level :id]))))
+      (reaction (get-in @state [:level]))))
 
 ; styles
 
@@ -207,6 +214,10 @@
                      :width "50px"
                      :height "50px"
                      :background "red"}]
+                   [:.win-view
+                    {:height "100%"
+                     :width "100%"
+                     :background-color "red"}]
                    [:.floor
                     {:position "absolute"
                      :background-image (str "url(/episodes/" (str @character-sprite) "/floor.png)")
@@ -324,8 +335,9 @@
       (let [progress (subscribe [:progress])
             progress-anim (anim/interpolate-to progress {:duration 500})]
            (fn []
-             [:div.progress-bar
-              [:div.progress {:style {:width (str (* @progress-anim 100) "%")}}]])))
+               [:div.progress-bar
+                [:div.progress
+                 {:style {:width (str (* @progress-anim 100) "%")}}]])))
 
 (defn character-view []
       (let [mood (subscribe [:character-mood])]
@@ -359,24 +371,30 @@
            {:on-click (fn [_]
                           (dispatch [:back-to-levels]))}]))
 
+(defn win-view []
+      (fn []
+          [:div.win-view "WIN!"]))
+
 (defn game-view[]
-      [:div
-       [:div.background]
-       [character-view]
-       [progress-bar-view]
-       [back-button-view]
-       [prompt-view]
-       [floor-view]
-       [choices-view]])
+      (fn []
+          [:div
+           [:div.background]
+           [character-view]
+           [progress-bar-view]
+           [back-button-view]
+           [prompt-view]
+           [floor-view]
+           [choices-view]]))
 
 (defn app-view []
-      (let [level-id (subscribe [:level-id])]
+      (let [level (subscribe [:level])]
            (fn []
                [:div.app
                 [styles-view]
-                (if (nil? @level-id)
-                  [levels-view]
-                  [game-view])])))
+                (case @level
+                      nil [levels-view]
+                      :end [win-view]
+                      [game-view])])))
 
 ; run functions
 
