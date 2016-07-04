@@ -34,7 +34,13 @@
   :character-sprite
   (fn [state _]
       (let [level-id (reaction (get-in @state [:level :id]))
-            episode-id (reaction (get-in @state [:levels @level-id :episode-id]))]
+            episode-id (reaction (->> @state
+                                      :episodes
+                                      vals
+                                      (filter (fn [e]
+                                                  (contains? (set (e :level-ids)) @level-id)))
+                                      first
+                                      :id))]
            (reaction (get-in @state [:episodes @episode-id :character-sprite])))))
 
 (register-sub

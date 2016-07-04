@@ -2,11 +2,11 @@
   (:require [re-frame.core :refer [register-handler]]))
 
 (def initial-state
-  {:episodes {123 {:id 123 :character-sprite "teacher"}
-              456 {:id 456 :character-sprite "farmer"}}
+  {:episodes {123 {:id 123 :character-sprite "teacher" :level-ids [3]}
+              456 {:id 456 :character-sprite "farmer" :level-ids [4]}}
 
-   :levels {3 {:id 3 :name "Level 3" :word-ids [1 5 7 9 10] :episode-id 123}
-            4 {:id 4 :name "Level 4" :word-ids [10 12 15 16] :episode-id 456}}
+   :levels {3 {:id 3 :name "Level 3" :word-ids [1 5 7 9 10]}
+            4 {:id 4 :name "Level 4" :word-ids [10 12 15 16]}}
 
    :words {1 {:id 1 :text "apple" :translation "manzana" :image "apple-image"}
            5 {:id 5 :text "orange" :translation "naranja" :image "orange-image"}
