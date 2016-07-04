@@ -43,6 +43,6 @@
       (reaction (vals (get-in @state [:levels])))))
 
 (register-sub
-  :level
+  :view
   (fn [state _]
-      (reaction (get-in @state [:level]))))
+      (reaction (get-in @state [:view]))))

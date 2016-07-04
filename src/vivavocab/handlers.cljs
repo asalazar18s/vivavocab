@@ -19,7 +19,10 @@
 
    :key-options #{:text :translation :image}
 
-   :level nil})
+   :view :levels ; :game :game-end
+
+   :level {:level-id 3
+           :stars 0}})
 
 (register-handler
   :initialize
@@ -86,9 +89,13 @@
                                                       :happy
                                                       :angry))))
 (defn maybe-set-win-state [state]
-      (let [progress (get-in state [:level :progress])]
+      (let [progress (get-in state [:level :progress])
+            level-id (get-in state [:level :id])]
            (if (>= progress 1.0)
-             (assoc state :level :end)
+             (-> state
+                 (assoc :view :game-end)
+                 (assoc :level {:id level-id
+                                :stars 0}))
              state)))
 
 
@@ -101,16 +108,33 @@
           (update-when-correct choice-id)
           (maybe-set-win-state))))
 
+(defn set-level [state level-id]
+  (-> state
+      (assoc :view :game)
+      (assoc :level {:id level-id
+                     :progress 0
+                     :character-mood :neutral})
+      (set-new-words)))
+
 (register-handler
   :choose-level
   (fn [state [_ level-id]]
-      (-> state
-          (assoc :level {:id level-id
-                         :progress 0
-                         :character-mood :neutral})
-          (set-new-words))))
+      (set-level state level-id)))
 
 (register-handler
   :back-to-levels
   (fn [state _]
-      (assoc state :level nil)))
+      (-> state
+          (assoc :level nil)
+          (assoc :view :levels))))
+
+(register-handler
+  :retry
+  (fn [state _]
+      (let [level-id (get-in state [:level :id])]
+           (set-level state level-id))))
+
+(register-handler
+  :next-level
+  (fn [state _]
+      state))
