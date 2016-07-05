@@ -1,5 +1,6 @@
 (ns vivavocab.handlers
-  (:require [re-frame.core :refer [register-handler]]))
+  (:require [re-frame.core :refer [register-handler]]
+            [vivavocab.helpers :refer [get-episode-id]]))
 
 (def initial-state
   {:episodes {123 {:id 123 :character-sprite "teacher" :level-ids [3]}
@@ -121,12 +122,15 @@
   (fn [state [_ level-id]]
       (set-level state level-id)))
 
+(defn back-to-levels [state]
+      (-> state
+          (assoc :level nil)
+          (assoc :view :levels)))
+
 (register-handler
   :back-to-levels
   (fn [state _]
-      (-> state
-          (assoc :level nil)
-          (assoc :view :levels))))
+      (back-to-levels state)))
 
 (register-handler
   :retry
@@ -137,4 +141,13 @@
 (register-handler
   :next-level
   (fn [state _]
-      state))
+      (let [level-id (get-in state [:level :id])
+            episode-id (get-episode-id state level-id)
+            level-ids (get-in state [:episodes episode-id :level-ids])
+            next-level-id (->> level-ids
+                               (drop-while (fn [id]
+                                               (not= id level-id)))
+                               second)]
+      (if next-level-id
+        (set-level state next-level-id)
+        (back-to-levels state)))))

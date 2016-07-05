@@ -22,7 +22,8 @@
                    [:.next
                     {:width "50px"
                      :height "50px"
-                     :background-color "cyan"}]
+                     :background-color "cyan"
+                     :position "absolute"}]
                    [:.back-button
                     {:position "absolute"
                      :width "50px"
