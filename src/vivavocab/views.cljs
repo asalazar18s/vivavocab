@@ -53,17 +53,22 @@
       (fn []
           [:div.floor]))
 
-(defn level-view [level]
-      [:div.level {:on-click (fn [_]
-                                 (dispatch [:choose-level (level :id)]))}
-       (level :name)])
+(defn level-view [level-id]
+      (let [level (subscribe [:level level-id])]
+           [:div.level {:on-click (fn [_]
+                                      (dispatch [:choose-level level-id]))}
+            (@level :name)]))
 
 (defn levels-view []
-      (let [levels (subscribe [:levels])]
+      (let [episodes (subscribe [:episodes])]
+           (tee @episodes)
            (fn []
-               [:div.levels
-                (for [level @levels]
-                     [level-view level])])))
+               [:div.episodes
+                (for [episode @episodes]
+                     (let [level-ids (episode :level-ids)]
+                          [:div.levels
+                           (for [level-id level-ids]
+                                [level-view level-id])]))])))
 
 (defn back-button-view []
       (fn []

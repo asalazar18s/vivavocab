@@ -11,6 +11,18 @@
                    {:margin "0"
                     :padding "0"}]
                   [:.app
+                   [:.episodes
+                    {:width "100vw"
+                     :height "100vh"
+                     :background-color "green"}
+                    [:.levels
+                     {:display "flex"
+                      :padding "50px"}
+                     [:.level
+                      {:width "100px"
+                       :height "100px"
+                       :border "1px solid black"
+                       :margin "10px"}]]]
                    [:.retry
                     {:width "50px"
                      :height "50px"
@@ -58,15 +70,7 @@
                      :height "100vh"
                      :top 0
                      :left 0}]
-                   [:.levels
-                    {:background-color "cyan"
-                     :position "absolute"
-                     :width "100vw"
-                     :height "100vh"}
-                    [:.level
-                     {:width "100px"
-                      :height "100px"
-                      :border "1px solid black"}]]
+
                    [:.progress-bar
                     {:width "100%"
                      :height "80px"
