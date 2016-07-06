@@ -11,6 +11,19 @@
                    {:margin "0"
                     :padding "0"}]
                   [:.app
+                   [:.retry
+                    {:width "50px"
+                     :height "50px"
+                     :background-color "blue"}]
+                   [:.menu
+                    {:width "50px"
+                     :height "50px"
+                     :background-color "green"}]
+                   [:.next
+                    {:width "50px"
+                     :height "50px"
+                     :background-color "cyan"
+                     :position "absolute"}]
                    [:.back-button
                     {:position "absolute"
                      :width "50px"

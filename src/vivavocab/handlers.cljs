@@ -1,12 +1,13 @@
 (ns vivavocab.handlers
-  (:require [re-frame.core :refer [register-handler]]))
+  (:require [re-frame.core :refer [register-handler]]
+            [vivavocab.helpers :refer [get-episode-id]]))
 
 (def initial-state
-  {:episodes {123 {:id 123 :character-sprite "teacher"}
-              456 {:id 456 :character-sprite "farmer"}}
+  {:episodes {123 {:id 123 :character-sprite "teacher" :level-ids [3]}
+              456 {:id 456 :character-sprite "farmer" :level-ids [4]}}
 
-   :levels {3 {:id 3 :name "Level 3" :word-ids [1 5 7 9 10] :episode-id 123}
-            4 {:id 4 :name "Level 4" :word-ids [10 12 15 16] :episode-id 456}}
+   :levels {3 {:id 3 :name "Level 3" :word-ids [1 5 7 9 10]}
+            4 {:id 4 :name "Level 4" :word-ids [10 12 15 16]}}
 
    :words {1 {:id 1 :text "apple" :translation "manzana" :image "apple-image"}
            5 {:id 5 :text "orange" :translation "naranja" :image "orange-image"}
@@ -19,7 +20,10 @@
 
    :key-options #{:text :translation :image}
 
-   :level nil})
+   :view :levels ; :game :game-end
+
+   :level {:level-id 3
+           :stars 0}})
 
 (register-handler
   :initialize
@@ -86,9 +90,13 @@
                                                       :happy
                                                       :angry))))
 (defn maybe-set-win-state [state]
-      (let [progress (get-in state [:level :progress])]
+      (let [progress (get-in state [:level :progress])
+            level-id (get-in state [:level :id])]
            (if (>= progress 1.0)
-             (assoc state :level :end)
+             (-> state
+                 (assoc :view :game-end)
+                 (assoc :level {:id level-id
+                                :stars 0}))
              state)))
 
 
@@ -101,16 +109,45 @@
           (update-when-correct choice-id)
           (maybe-set-win-state))))
 
+(defn set-level [state level-id]
+  (-> state
+      (assoc :view :game)
+      (assoc :level {:id level-id
+                     :progress 0
+                     :character-mood :neutral})
+      (set-new-words)))
+
 (register-handler
   :choose-level
   (fn [state [_ level-id]]
+      (set-level state level-id)))
+
+(defn back-to-levels [state]
       (-> state
-          (assoc :level {:id level-id
-                         :progress 0
-                         :character-mood :neutral})
-          (set-new-words))))
+          (assoc :level nil)
+          (assoc :view :levels)))
 
 (register-handler
   :back-to-levels
   (fn [state _]
-      (assoc state :level nil)))
+      (back-to-levels state)))
+
+(register-handler
+  :retry
+  (fn [state _]
+      (let [level-id (get-in state [:level :id])]
+           (set-level state level-id))))
+
+(register-handler
+  :next-level
+  (fn [state _]
+      (let [level-id (get-in state [:level :id])
+            episode-id (get-episode-id state level-id)
+            level-ids (get-in state [:episodes episode-id :level-ids])
+            next-level-id (->> level-ids
+                               (drop-while (fn [id]
+                                               (not= id level-id)))
+                               second)]
+      (if next-level-id
+        (set-level state next-level-id)
+        (back-to-levels state)))))

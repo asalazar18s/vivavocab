@@ -82,9 +82,12 @@
              [:div.star]]
             [:div.message]]
            [:div.buttons
-            [:div.retry]
-            [:div.menu]
-            [:div.next]]]))
+            [:div.retry {:on-click (fn [_]
+                                       (dispatch [:retry]))}]
+            [:div.menu {:on-click (fn [_]
+                                      (dispatch [:back-to-levels]))}]
+            [:div.next {:on-click (fn [_]
+                                      (dispatch [:next-level]))}]]]))
 
 (defn game-view[]
       (fn []
@@ -98,11 +101,11 @@
            [choices-view]]))
 
 (defn app-view []
-      (let [level (subscribe [:level])]
+      (let [level (subscribe [:view])]
            (fn []
                [:div.app
                 [styles/styles-view]
                 (case @level
-                      nil [levels-view]
-                      :end [win-view]
-                      [game-view])])))
+                      :levels [levels-view]
+                      :game-end [win-view]
+                      :game [game-view])])))

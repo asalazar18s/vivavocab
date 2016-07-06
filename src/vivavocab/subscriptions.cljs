@@ -1,6 +1,7 @@
 (ns vivavocab.subscriptions
   (:require-macros [reagent.ratom :refer [reaction]])
-  (:require [re-frame.core :refer [register-sub]]))
+  (:require [re-frame.core :refer [register-sub]]
+            [vivavocab.helpers :refer [get-episode-id]]))
 
 (register-sub
   :question
@@ -34,7 +35,7 @@
   :character-sprite
   (fn [state _]
       (let [level-id (reaction (get-in @state [:level :id]))
-            episode-id (reaction (get-in @state [:levels @level-id :episode-id]))]
+            episode-id (reaction (get-episode-id @state @level-id))]
            (reaction (get-in @state [:episodes @episode-id :character-sprite])))))
 
 (register-sub
@@ -43,6 +44,6 @@
       (reaction (vals (get-in @state [:levels])))))
 
 (register-sub
-  :level
+  :view
   (fn [state _]
-      (reaction (get-in @state [:level]))))
+      (reaction (get-in @state [:view]))))
