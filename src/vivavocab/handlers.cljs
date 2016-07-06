@@ -43,12 +43,20 @@
 (defn set-new-words [state]
       (let [word-count 4
             level-id (get-in state [:level :id])
-            choice-ids (->> (get-in state [:levels level-id :word-ids])
-                            shuffle
-                            (take word-count)
-                            vec)
-            prompt-id (-> choice-ids
+            previous-prompt-id (get-in state [:level :question :prompt :id])
+            prompt-id (-> (get-in state [:levels level-id :word-ids])
+                          set
+                          (disj previous-prompt-id)
+                          vec
                           rand-nth)
+            choice-ids (-> (get-in state [:levels level-id :word-ids])
+                            set
+                            (disj prompt-id)
+                            shuffle
+                            (->> (take (dec word-count)))
+                            vec
+                            (conj prompt-id)
+                            shuffle)
             prompt-key (-> state
                            :key-options
                            vec
