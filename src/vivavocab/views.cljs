@@ -2,7 +2,9 @@
    (:require [re-frame.core :refer [dispatch subscribe]]
              [vivavocab.styles :as styles]
              [vivavocab.games.flash.views :refer [game-view win-view]]
-             [vivavocab.games.flash.styles :as flash]))
+             [vivavocab.games.flash.styles :as flash]
+             [vivavocab.games.memory.views :as memory]
+             ))
 
 (defn level-view [level-id]
       (let [level (subscribe [:level level-id])]
@@ -23,7 +25,8 @@
 (defn app-view []
       (let [level (subscribe [:view])]
            (fn []
-               [:div.app
+               [memory/game-view]
+               #_[:div.app
                 [styles/styles-view]
                 [flash/styles-view]
                 (case @level
