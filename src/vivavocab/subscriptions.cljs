@@ -4,29 +4,6 @@
             [vivavocab.helpers :refer [get-episode-id]]))
 
 (register-sub
-  :question
-  (fn [state _]
-      (reaction (get-in @state [:level :question]))))
-
-(register-sub
-  :prompt-word
-  (fn [state _]
-      (let [prompt-id (reaction (get-in @state [:level :question :prompt :id]))
-            prompt-key (reaction (get-in @state [:level :question :prompt-key]))]
-           (reaction (get-in @state [:words @prompt-id @prompt-key])))))
-
-(register-sub
-  :choice-word
-  (fn [state [_ id]]
-      (let [choice-key (reaction (get-in @state [:level :question :choice-key]))]
-           (reaction (get-in @state [:words id @choice-key])))))
-
-(register-sub
-  :progress
-  (fn [state _]
-      (reaction (get-in @state [:level :progress]))))
-
-(register-sub
   :character-mood
   (fn [state _]
       (reaction (get-in @state [:level :character-mood]))))
