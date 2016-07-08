@@ -45,9 +45,7 @@
             :box-sizing "border-box"}
 
            [:.card
-            {
-
-             :width (str card-size "px")
+            {:width (str card-size "px")
              :height (str card-size "px")
              :font-size "25px"
              :font-family "Helvetica"
@@ -55,18 +53,8 @@
              :background-size "contain"
              :text-align "center"}
             [:&.back
-             {:background-image "url(/images/game/choice_bg_wrong.png)"}]
+             {:background-image "url(/images/game/choice_bg.png)"}]
             [:&.gone
              {:background-image ""}]
             [:&.flipped
-             {:background-image "url(/images/game/choice_bg.png)"}]
-
-            ]
-           ]
-
-          ]
-         )
-       ]
-
-
-      )
+             {:background-image "url(/images/game/choice_bg_wrong.png)"}]]]])])

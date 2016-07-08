@@ -3,13 +3,23 @@
             [reanimated.core :as anim]
             [vivavocab.games.memory.styles :refer [styles-view]]))
 
-(def cards [1 2 3 4 5 6 7 8 9 10 11 12])
+(defn card-view [card]
+      [:div.card {:class (name (card :status))
+                  :on-click (fn [_] (dispatch [:memory/flip-card card]))}
+       (when (= (card :status) :back)
+             (card :value))])
+
+(defn cards-view []
+      (let [cards (subscribe [:memory/cards])]
+           (fn []
+               [:div.cards
+                (for [card @cards]
+                     [card-view card])])))
 
 (defn game-view []
       (fn []
+          (dispatch [:memory/initialize])
           [:div.game.memory
            [styles-view]
            [:div.character]
-           [:div.cards
-            (for [card cards]
-                 [:div.card {:class "flipped"} card])]]))
+           [cards-view]]))

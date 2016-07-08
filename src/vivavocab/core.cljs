@@ -4,7 +4,8 @@
             [vivavocab.views :as views]
             [vivavocab.handlers]
             [vivavocab.subscriptions]
-            [vivavocab.games.flash.core]))
+            [vivavocab.games.flash.core]
+            [vivavocab.games.memory.core]))
 
 (enable-console-print!)
 
