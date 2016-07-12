@@ -11,24 +11,31 @@
         16 {:id 16 :text "pomegranate" :translation "granada" :image "pomegranate-image"}}
 
 (defn generate-list [state]
-      (let [word-ids (->> state
-                          :words
-                          keys
-                          shuffle
-                          (take 6)
-                          cycle
-                          (take 12)
-                          shuffle)
-            key-options (get-in state [:key-options])
-            cards (->> word-ids
-                       (map-indexed (fn [index word-id]
-                                        {:status :flipped
-                                         :index index
-                                         :word-id word-id
-                                         :word-key :text
-                                         :value word-id}))
+      (let [cards (->> state
+                       :words
+                       keys
+                       shuffle
+                       (take 6)
+                       ; (1 2 3 4 5 6)
+                       (mapcat (fn [word-id]
+                                   (let [word-keys (->> (get-in state [:key-options])
+                                                        shuffle
+                                                        (take 2))]
+                                        [{:word-id word-id :word-key (first word-keys)}
+                                         {:word-id word-id :word-key (last word-keys)}])))
+                       ; [{:word-id 1 :word-key key1}
+                       ;  {:word-id 1 :word-key key2} ...]
+                       shuffle
+                       (map-indexed (fn [index card]
+                                        (merge card
+                                               {:status :flipped
+                                                :index index
+                                                :value (get-in state [:words (card :word-id) (card :word-key)])})))
                        (reduce (fn [memo card]
-                                   (assoc memo (card :index) card)) {}))]
+                                   (assoc memo (card :index) card)) {})
+                       ; {1 {:status flipped
+                       ;     :index 1 ...} ...}
+                       )]
            cards))
 
 (register-handler
