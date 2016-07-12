@@ -43,7 +43,11 @@
   (fn [state _]
       (assoc-in state [:game :cards] (generate-list state))))
 
+(defn flip-card-up [state card-index]
+      (assoc-in state [:game :cards card-index :status] :back))
+
 (register-handler
   :memory/flip-card
   (fn [state [_ card]]
-      (assoc-in state [:game :cards (card :index) :status] :back)))
+      (-> state
+          (flip-card-up (card :index)))))
