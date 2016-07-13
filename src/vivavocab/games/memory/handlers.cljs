@@ -75,12 +75,13 @@
              state)))
 
 (register-handler
+  :memory/check-choices
+  (fn [state _]
+      (check-choices state)))
+
+(register-handler
   :memory/flip-card
   (fn [state [_ card]]
       (-> state
-          (flip-card-up (card :index))
           (check-choices)
-          tee
-
-          ; when 2 flipped: reset flipped count, remove cards if match, etc.
-          )))
+          (flip-card-up (card :index)))))
