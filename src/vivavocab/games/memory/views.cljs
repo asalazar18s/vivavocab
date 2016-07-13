@@ -5,7 +5,8 @@
 
 (defn card-view [card]
       [:div.card {:class (name (card :status))
-                  :on-click (fn [_] (dispatch [:memory/flip-card card]))}
+                  :on-click (fn [_] (when (= (card :status) :flipped)
+                                          (dispatch [:memory/flip-card card])))}
        (when (= (card :status) :back)
              (card :value))])
 
