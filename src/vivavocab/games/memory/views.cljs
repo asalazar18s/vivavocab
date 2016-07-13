@@ -1,7 +1,8 @@
 (ns vivavocab.games.memory.views
   (:require [re-frame.core :refer [dispatch subscribe]]
             [reanimated.core :as anim]
-            [vivavocab.games.memory.styles :refer [styles-view]]))
+            [vivavocab.games.memory.styles :refer [styles-view]]
+            [vivavocab.games.common.views :refer [win-view]]))
 
 (def timeout (atom nil))
 
@@ -23,10 +24,20 @@
                 (for [card @cards]
                      [card-view card])])))
 
+(defn level-view []
+      [:div
+       [styles-view]
+       [:div.character]
+       [cards-view]])
+
 (defn game-view []
-      (fn []
-          (dispatch [:memory/initialize])
+      (let [game-over? (subscribe [:memory/game-over?])]
+        (fn []
           [:div.game.memory
-           [styles-view]
-           [:div.character]
-           [cards-view]]))
+           (if @game-over?
+             [win-view {:retry :memory/retry
+                        :back-to-levels :memory/back-to-levels
+                        :next-level :memory/next-level}]
+             [level-view])])))
+
+(dispatch [:memory/initialize])

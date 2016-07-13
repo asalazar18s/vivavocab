@@ -6,3 +6,11 @@
   :memory/cards
   (fn [state _]
       (reaction (vals (get-in @state [:game :cards])))))
+
+(register-sub
+  :memory/game-over?
+  (fn [state _]
+      (reaction (->> (get-in @state [:game :cards])
+                     vals
+                     (every? (fn [card]
+                                 (= (card :status) :gone)))))))

@@ -1,7 +1,8 @@
 (ns vivavocab.games.flash.views
   (:require [re-frame.core :refer [dispatch subscribe]]
             [reanimated.core :as anim]
-            [vivavocab.games.flash.styles :refer [styles-view]]))
+            [vivavocab.games.flash.styles :refer [styles-view]]
+            [vivavocab.games.common.views :refer [win-view]]))
 
 (defn choice-view [choice]
       (let [word (subscribe [:choice-word (choice :id)])]
@@ -58,24 +59,6 @@
           [:div.back-button
            {:on-click (fn [_]
                           (dispatch [:back-to-levels]))}]))
-
-(defn win-view []
-      (fn []
-          [:div.win-view
-           [:div.character]
-           [:div.bubble
-            [:div.stars
-             [:div.star]
-             [:div.star]
-             [:div.star]]
-            [:div.message]]
-           [:div.buttons
-            [:div.retry {:on-click (fn [_]
-                                       (dispatch [:retry]))}]
-            [:div.menu {:on-click (fn [_]
-                                      (dispatch [:back-to-levels]))}]
-            [:div.next {:on-click (fn [_]
-                                      (dispatch [:next-level]))}]]]))
 
 (defn game-view []
       (fn []

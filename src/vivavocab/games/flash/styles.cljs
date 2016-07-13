@@ -7,26 +7,7 @@
            (fn []
                [:style
                 (garden/css
-                  [:.win-view
-                   {:height "100%"
-                    :width "100%"
-                    :background-color "red"}
 
-                   [:.next
-                    {:width "50px"
-                     :height "50px"
-                     :background-color "cyan"
-                     :position "absolute"}]
-
-                   [:.retry
-                    {:width "50px"
-                     :height "50px"
-                     :background-color "blue"}]
-
-                   [:.menu
-                    {:width "50px"
-                     :height "50px"
-                     :background-color "green"}]]
 
                   [:.character
                    {:background-image (str "url(/episodes/" (str @character-sprite) "/char_neutral.png)")

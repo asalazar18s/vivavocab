@@ -29,11 +29,14 @@
                        )]
            cards))
 
+(defn initialize [state]
+      (assoc-in state [:game] {:cards (generate-list state)
+                               :flipped-count 0}))
+
 (register-handler
   :memory/initialize
   (fn [state _]
-      (assoc-in state [:game] {:cards (generate-list state)
-                               :flipped-count 0})))
+      (initialize state)))
 
 (defn flip-card-up [state card-index]
       (-> state
@@ -56,7 +59,6 @@
                                vals
                                (filter (fn [card]
                                            (= (card :status) :back))))]
-           (tee flipped-cards)
       (if (= (:word-id (first flipped-cards))
              (:word-id (last flipped-cards)))
         (-> state
@@ -85,3 +87,19 @@
       (-> state
           (check-choices)
           (flip-card-up (card :index)))))
+
+(register-handler
+  :memory/retry
+  (fn [state _]
+      (initialize state)))
+
+(register-handler
+  :memory/next-level
+  (fn [state _]
+      (initialize state)))
+
+(register-handler
+  :memory/back-to-levels
+  (fn [state _]
+      ; TODO
+      ))
