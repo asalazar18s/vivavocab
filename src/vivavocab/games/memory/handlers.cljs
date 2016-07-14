@@ -30,12 +30,34 @@
            cards))
 
 (defn initialize [state]
-      (assoc-in state [:game] {:cards (generate-list state)}))
+      (assoc-in state [:game] {:cards (generate-list state)
+                               :character-mood :neutral}))
 
 (register-handler
   :memory/initialize
   (fn [state _]
       (initialize state)))
+
+(defn flipped-cards [state]
+      (->> (get-in state [:game :cards])
+           vals
+           (filter (fn [card]
+                       (= (card :status) :front)))))
+
+(defn cards-match? [state]
+      (let [flipped-cards (flipped-cards state)]
+           (= (:word-id (first flipped-cards))
+              (:word-id (last flipped-cards)))))
+
+(defn reset-character-mood [state]
+      (assoc-in state [:game :character-mood] :neutral))
+
+(defn update-character-mood [state]
+      (assoc-in state [:game :character-mood] (if (= (count (flipped-cards state)) 2)
+                                                (if (cards-match? state)
+                                                  :happy
+                                                  :angry)
+                                                :neutral)))
 
 (defn flip-card-front [state card-index]
       (-> state
@@ -50,29 +72,21 @@
           (assoc-in [:game :cards card-index :status] :gone)))
 
 (defn flip-back-or-remove-cards [state]
-      (let [flipped-cards (->> (get-in state [:game :cards])
-                               vals
-                               (filter (fn [card]
-                                           (= (card :status) :front))))]
-      (if (= (:word-id (first flipped-cards))
-             (:word-id (last flipped-cards)))
-        (-> state
-            (remove-card (:index (first flipped-cards)))
-            (remove-card (:index (last flipped-cards))))
-        (-> state
-            (flip-card-back (:index (first flipped-cards)))
-            (flip-card-back (:index (last flipped-cards)))))))
+      (let [flipped-cards (flipped-cards state)]
+           (if (cards-match? state)
+             (-> state
+                 (remove-card (:index (first flipped-cards)))
+                 (remove-card (:index (last flipped-cards))))
+             (-> state
+                 (flip-card-back (:index (first flipped-cards)))
+                 (flip-card-back (:index (last flipped-cards)))))))
 
 (defn check-choices [state]
-      (let [flipped-count  (->> (get-in state [:game :cards])
-                                vals
-                                (filter (fn [card]
-                                            (= (card :status) :front)))
-                                count)]
-           (if (= flipped-count 2)
+           (if (= (count (flipped-cards state)) 2)
              (-> state
-                 (flip-back-or-remove-cards))
-             state)))
+                 (flip-back-or-remove-cards)
+                 (reset-character-mood))
+             state))
 
 (register-handler
   :memory/check-choices
@@ -84,7 +98,8 @@
   (fn [state [_ card]]
       (-> state
           (check-choices)
-          (flip-card-front (card :index)))))
+          (flip-card-front (card :index))
+          (update-character-mood))))
 
 (register-handler
   :memory/retry

@@ -26,10 +26,18 @@
                 (for [card @cards]
                      [card-view card])])))
 
+(defn character-view []
+      (let [character-mood (subscribe [:memory/character-mood])]
+      (fn []
+          [:div.character {:class (case @character-mood
+                                        :angry "angry"
+                                        :happy "happy"
+                                        :neutral "neutral")}])))
+
 (defn level-view []
       [:div
        [styles-view]
-       [:div.character]
+       [character-view]
        [cards-view]])
 
 (defn game-view []

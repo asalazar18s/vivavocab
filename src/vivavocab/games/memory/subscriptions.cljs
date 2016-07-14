@@ -19,3 +19,8 @@
   :memory/card-value
   (fn [state [_ word-id word-key]]
       (reaction (get-in @state [:words word-id word-key]))))
+
+(register-sub
+  :memory/character-mood
+  (fn [state _]
+      (reaction (get-in @state [:game :character-mood]))))
