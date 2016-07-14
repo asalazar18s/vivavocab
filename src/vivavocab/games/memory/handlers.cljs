@@ -20,8 +20,7 @@
                        (map-indexed (fn [index card]
                                         (merge card
                                                {:status :back
-                                                :index index
-                                                :value (get-in state [:words (card :word-id) (card :word-key)])})))
+                                                :index index})))
                        (reduce (fn [memo card]
                                    (assoc memo (card :index) card)) {})
                        ; {1 {:status :back

@@ -7,15 +7,17 @@
 (def timeout (atom nil))
 
 (defn card-view [card]
-      [:div.card {:class (name (card :status))
-                  :on-click (fn [_] (when (= (card :status) :back)
-                                          (dispatch [:memory/flip-card card])
-                                          (js/clearTimeout @timeout)
-                                          (reset! timeout (js/setTimeout
-                                                            (fn [] (dispatch [:memory/check-choices]))
-                                                            1500))))}
-       (when (= (card :status) :front)
-             (card :value))])
+      (let [card-value (subscribe [:memory/card-value (card :word-id) (card :word-key)])]
+           (fn [card]
+               [:div.card {:class (name (card :status))
+                           :on-click (fn [_] (when (= (card :status) :back)
+                                                   (dispatch [:memory/flip-card card])
+                                                   (js/clearTimeout @timeout)
+                                                   (reset! timeout (js/setTimeout
+                                                                     (fn [] (dispatch [:memory/check-choices]))
+                                                                     1500))))}
+                (when (= (card :status) :front)
+                      @card-value)])))
 
 (defn cards-view []
       (let [cards (subscribe [:memory/cards])]
