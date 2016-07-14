@@ -30,8 +30,7 @@
            cards))
 
 (defn initialize [state]
-      (assoc-in state [:game] {:cards (generate-list state)
-                               :flipped-count 0}))
+      (assoc-in state [:game] {:cards (generate-list state)}))
 
 (register-handler
   :memory/initialize
@@ -40,8 +39,7 @@
 
 (defn flip-card-front [state card-index]
       (-> state
-          (assoc-in [:game :cards card-index :status] :front)
-          (update-in [:game :flipped-count] inc)))
+          (assoc-in [:game :cards card-index :status] :front)))
 
 (defn flip-card-back [state card-index]
       (-> state
@@ -50,9 +48,6 @@
 (defn remove-card [state card-index]
       (-> state
           (assoc-in [:game :cards card-index :status] :gone)))
-
-(defn reset-flipped-count [state]
-      (assoc-in state [:game :flipped-count] 0))
 
 (defn flip-back-or-remove-cards [state]
       (let [flipped-cards (->> (get-in state [:game :cards])
@@ -69,10 +64,13 @@
             (flip-card-back (:index (last flipped-cards)))))))
 
 (defn check-choices [state]
-      (let [flipped-count (get-in state [:game :flipped-count])]
+      (let [flipped-count  (->> (get-in state [:game :cards])
+                                vals
+                                (filter (fn [card]
+                                            (= (card :status) :front)))
+                                count)]
            (if (= flipped-count 2)
              (-> state
-                 (reset-flipped-count)
                  (flip-back-or-remove-cards))
              state)))
 
