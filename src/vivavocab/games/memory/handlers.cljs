@@ -18,9 +18,10 @@
                        ;  {:word-id 1 :word-key key2} ...]
                        shuffle
                        (map-indexed (fn [index card]
-                                        (merge card
-                                               {:status :back
-                                                :index index})))
+                                        {:word-id (card :word-id)
+                                         :word-key (card :word-key)
+                                         :status :back
+                                         :index index}))
                        (reduce (fn [memo card]
                                    (assoc memo (card :index) card)) {})
                        ; {1 {:status :back
