@@ -52,9 +52,9 @@
              :line-height (str card-size "px")
              :background-size "contain"
              :text-align "center"}
-            [:&.back
+            [:&.front
              {:background-image "url(/images/game/choice_bg.png)"}]
             [:&.gone
              {:background-image ""}]
-            [:&.flipped
+            [:&.back
              {:background-image "url(/images/game/choice_bg_wrong.png)"}]]]])])

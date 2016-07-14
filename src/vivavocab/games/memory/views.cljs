@@ -8,13 +8,13 @@
 
 (defn card-view [card]
       [:div.card {:class (name (card :status))
-                  :on-click (fn [_] (when (= (card :status) :flipped)
+                  :on-click (fn [_] (when (= (card :status) :back)
                                           (dispatch [:memory/flip-card card])
                                           (js/clearTimeout @timeout)
                                           (reset! timeout (js/setTimeout
                                                             (fn [] (dispatch [:memory/check-choices]))
                                                             1500))))}
-       (when (= (card :status) :back)
+       (when (= (card :status) :front)
              (card :value))])
 
 (defn cards-view []

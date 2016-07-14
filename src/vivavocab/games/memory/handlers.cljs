@@ -19,12 +19,12 @@
                        shuffle
                        (map-indexed (fn [index card]
                                         (merge card
-                                               {:status :flipped
+                                               {:status :back
                                                 :index index
                                                 :value (get-in state [:words (card :word-id) (card :word-key)])})))
                        (reduce (fn [memo card]
                                    (assoc memo (card :index) card)) {})
-                       ; {1 {:status flipped
+                       ; {1 {:status :back
                        ;     :index 1 ...} ...}
                        )]
            cards))
@@ -38,14 +38,14 @@
   (fn [state _]
       (initialize state)))
 
-(defn flip-card-up [state card-index]
+(defn flip-card-front [state card-index]
       (-> state
-          (assoc-in [:game :cards card-index :status] :back)
+          (assoc-in [:game :cards card-index :status] :front)
           (update-in [:game :flipped-count] inc)))
 
 (defn flip-card-back [state card-index]
       (-> state
-          (assoc-in [:game :cards card-index :status] :flipped)))
+          (assoc-in [:game :cards card-index :status] :back)))
 
 (defn remove-card [state card-index]
       (-> state
@@ -58,7 +58,7 @@
       (let [flipped-cards (->> (get-in state [:game :cards])
                                vals
                                (filter (fn [card]
-                                           (= (card :status) :back))))]
+                                           (= (card :status) :front))))]
       (if (= (:word-id (first flipped-cards))
              (:word-id (last flipped-cards)))
         (-> state
@@ -86,7 +86,7 @@
   (fn [state [_ card]]
       (-> state
           (check-choices)
-          (flip-card-up (card :index)))))
+          (flip-card-front (card :index)))))
 
 (register-handler
   :memory/retry
