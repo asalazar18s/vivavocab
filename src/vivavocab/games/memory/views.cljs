@@ -7,15 +7,17 @@
 (def timeout (atom nil))
 
 (defn card-view [card]
-      [:div.card {:class (name (card :status))
-                  :on-click (fn [_] (when (= (card :status) :flipped)
-                                          (dispatch [:memory/flip-card card])
-                                          (js/clearTimeout @timeout)
-                                          (reset! timeout (js/setTimeout
-                                                            (fn [] (dispatch [:memory/check-choices]))
-                                                            1500))))}
-       (when (= (card :status) :back)
-             (card :value))])
+      (let [card-value (subscribe [:memory/card-value (card :word-id) (card :word-key)])]
+           (fn [card]
+               [:div.card {:class (name (card :status))
+                           :on-click (fn [_] (when (= (card :status) :back)
+                                                   (dispatch [:memory/flip-card card])
+                                                   (js/clearTimeout @timeout)
+                                                   (reset! timeout (js/setTimeout
+                                                                     (fn [] (dispatch [:memory/check-choices]))
+                                                                     1500))))}
+                (when (= (card :status) :front)
+                      @card-value)])))
 
 (defn cards-view []
       (let [cards (subscribe [:memory/cards])]
@@ -24,10 +26,18 @@
                 (for [card @cards]
                      [card-view card])])))
 
+(defn character-view []
+      (let [character-mood (subscribe [:memory/character-mood])]
+      (fn []
+          [:div.character {:class (case @character-mood
+                                        :angry "angry"
+                                        :happy "happy"
+                                        :neutral "neutral")}])))
+
 (defn level-view []
       [:div
        [styles-view]
-       [:div.character]
+       [character-view]
        [cards-view]])
 
 (defn game-view []
