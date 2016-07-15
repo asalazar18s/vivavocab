@@ -21,7 +21,7 @@
 
    :key-options #{:text :translation :image}
 
-   :view :levels ; :game :game-end
+   :view :levels ; :game :game-end :memory-game
 
    :level {:level-id 3
            :stars 0}})
@@ -43,6 +43,12 @@
   :choose-level
   (fn [state [_ level-id]]
       (set-level state level-id)))
+
+(register-handler
+  :go-to-memory-game
+  (fn [state _]
+      (-> state
+          (assoc :view :memory-game))))
 
 (defn back-to-levels [state]
       (-> state
