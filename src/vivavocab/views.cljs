@@ -27,14 +27,13 @@
 (defn app-view []
       (let [level (subscribe [:view])]
            (fn []
-
                [:div.app
                 [styles/styles-view]
                 [flash/styles-view]
                 (case @level
                       :levels [levels-view]
                       :memory-game [memory/game-view]
-                      :game-end [win-view {:retry :retry
-                                           :back-to-levels :back-to-levels
-                                           :next-level :next-level}]
+                      :game-end [win-view {:retry :flash/retry
+                                           :back-to-levels :flash/back-to-levels
+                                           :next-level :flash/next-level}]
                       :game [game-view])])))

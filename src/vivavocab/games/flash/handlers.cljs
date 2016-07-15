@@ -79,8 +79,33 @@
                                                       :happy
                                                       :angry))))
 
+(defn back-to-levels [state]
+      (-> state
+          (assoc :level nil)
+          (assoc :view :levels)))
+
 (register-handler
-  :guess
+  :flash/back-to-levels
+  (fn [state _]
+      (back-to-levels state)))
+
+(register-handler
+  :flash/next-level
+  (fn [state _]
+      (let [level-id (get-in state [:level :id])
+            episode-id (get-episode-id state level-id)
+            level-ids (get-in state [:episodes episode-id :level-ids])
+            next-level-id (->> level-ids
+                               (drop-while (fn [id]
+                                               (not= id level-id)))
+                               second)]
+           (if next-level-id
+             (set-level state next-level-id)
+             (back-to-levels state)))))
+
+
+(register-handler
+  :flash/guess
   (fn [state [_ choice-id]]
       (-> state
           (update-choice-status choice-id)
