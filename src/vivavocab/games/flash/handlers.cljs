@@ -105,6 +105,11 @@
 
 
 (register-handler
+  :flash/reset-character-mood
+  (fn [state _]
+      (assoc-in state [:level :character-mood] :neutral)))
+
+(register-handler
   :flash/guess
   (fn [state [_ choice-id]]
       (-> state

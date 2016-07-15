@@ -4,6 +4,8 @@
             [vivavocab.games.flash.styles :refer [styles-view]]
             [vivavocab.games.common.views :refer [win-view]]))
 
+(def timeout (atom nil))
+
 (defn choice-view [choice]
       (let [word (subscribe [:flash/choice-word (choice :id)])]
            (fn [choice]
@@ -13,7 +15,11 @@
                               false "incorrect"
                               nil "")
                  :on-click (fn []
-                               (dispatch [:flash/guess (choice :id)]))}
+                               (dispatch [:flash/guess (choice :id)])
+                               (js/clearTimeout @timeout)
+                               (reset! timeout (js/setTimeout
+                                                 (fn [] (dispatch [:flash/reset-character-mood]))
+                                                 1500)))}
                 @word])))
 
 (defn choices-view []
