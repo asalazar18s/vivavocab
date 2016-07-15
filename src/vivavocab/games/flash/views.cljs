@@ -4,8 +4,10 @@
             [vivavocab.games.flash.styles :refer [styles-view]]
             [vivavocab.games.common.views :refer [win-view]]))
 
+(def timeout (atom nil))
+
 (defn choice-view [choice]
-      (let [word (subscribe [:choice-word (choice :id)])]
+      (let [word (subscribe [:flash/choice-word (choice :id)])]
            (fn [choice]
                [:div.choice.card
                 {:class (case (choice :correct?)
@@ -13,11 +15,15 @@
                               false "incorrect"
                               nil "")
                  :on-click (fn []
-                               (dispatch [:guess (choice :id)]))}
+                               (dispatch [:flash/guess (choice :id)])
+                               (js/clearTimeout @timeout)
+                               (reset! timeout (js/setTimeout
+                                                 (fn [] (dispatch [:flash/reset-character-mood]))
+                                                 1500)))}
                 @word])))
 
 (defn choices-view []
-      (let [question (subscribe [:question])]
+      (let [question (subscribe [:flash/question])]
            (fn []
                [:div.choices
                 (doall
@@ -26,14 +32,14 @@
                        [choice-view choice]))])))
 
 (defn prompt-view []
-      (let [prompt-word (subscribe [:prompt-word])]
+      (let [prompt-word (subscribe [:flash/prompt-word])]
            (fn []
                [:div.prompt-background
                 [:div.prompt
                  @prompt-word]])))
 
 (defn progress-bar-view []
-      (let [progress (subscribe [:progress])
+      (let [progress (subscribe [:flash/progress])
             progress-anim (anim/interpolate-to progress {:duration 500})]
            (fn []
                [:div.progress-bar
@@ -41,7 +47,7 @@
                  {:style {:width (str (* @progress-anim 100) "%")}}]])))
 
 (defn character-view []
-      (let [mood (subscribe [:character-mood])]
+      (let [mood (subscribe [:flash/character-mood])]
            (fn []
                [:div.character
                 {:class
@@ -58,7 +64,7 @@
       (fn []
           [:div.back-button
            {:on-click (fn [_]
-                          (dispatch [:back-to-levels]))}]))
+                          (dispatch [:flash/back-to-levels]))}]))
 
 (defn game-view []
       (fn []

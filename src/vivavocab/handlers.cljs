@@ -21,7 +21,7 @@
 
    :key-options #{:text :translation :image}
 
-   :view :levels ; :game :game-end
+   :view :levels ; :game :game-end :memory-game
 
    :level {:level-id 3
            :stars 0}})
@@ -44,15 +44,11 @@
   (fn [state [_ level-id]]
       (set-level state level-id)))
 
-(defn back-to-levels [state]
-      (-> state
-          (assoc :level nil)
-          (assoc :view :levels)))
-
 (register-handler
-  :back-to-levels
+  :go-to-memory-game
   (fn [state _]
-      (back-to-levels state)))
+      (-> state
+          (assoc :view :memory-game))))
 
 (register-handler
   :retry
@@ -60,16 +56,3 @@
       (let [level-id (get-in state [:level :id])]
            (set-level state level-id))))
 
-(register-handler
-  :next-level
-  (fn [state _]
-      (let [level-id (get-in state [:level :id])
-            episode-id (get-episode-id state level-id)
-            level-ids (get-in state [:episodes episode-id :level-ids])
-            next-level-id (->> level-ids
-                               (drop-while (fn [id]
-                                               (not= id level-id)))
-                               second)]
-      (if next-level-id
-        (set-level state next-level-id)
-        (back-to-levels state)))))

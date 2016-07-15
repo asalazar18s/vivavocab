@@ -3,7 +3,7 @@
              [re-frame.core :refer [subscribe]]))
 
 (defn styles-view []
-      (let [character-sprite (subscribe [:character-sprite])]
+      (let [character-sprite (subscribe [:flash/character-sprite])]
            (fn []
                [:style
                 (garden/css
