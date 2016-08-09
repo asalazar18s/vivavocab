@@ -1,5 +1,5 @@
 (ns vivavocab.handlers
-  (:require [re-frame.core :refer [register-handler]]
+  (:require [re-frame.core :refer [register-handler dispatch]]
             [vivavocab.helpers :refer [get-episode-id]]
             [vivavocab.games.flash.handlers :refer [set-new-words]]))
 
@@ -47,6 +47,7 @@
 (register-handler
   :go-to-memory-game
   (fn [state _]
+      (dispatch [:memory/initialize])
       (-> state
           (assoc :view :memory-game))))
 
