@@ -1,6 +1,5 @@
 (ns vivavocab.handlers
   (:require [re-frame.core :refer [register-handler dispatch]]
-            [vivavocab.helpers :refer [get-episode-id]]
             [vivavocab.games.flash.handlers :refer [set-new-words]]))
 
 (def initial-state
@@ -32,12 +31,9 @@
       (merge state initial-state)))
 
 (defn set-level [state level-id]
-  (-> state
-      (assoc :view :game)
-      (assoc :level {:id level-id
-                     :progress 0
-                     :character-mood :neutral})
-      (set-new-words)))
+      (dispatch [:flash/initialize level-id])
+      (-> state
+          (assoc :view :game)))
 
 (register-handler
   :choose-level

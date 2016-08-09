@@ -1,5 +1,6 @@
 (ns vivavocab.games.flash.handlers
-  (:require [re-frame.core :refer [register-handler]]))
+  (:require [re-frame.core :refer [register-handler dispatch]]
+            [vivavocab.helpers :refer [get-episode-id]]))
 
 (defn set-new-words [state]
       (let [word-count 4
@@ -40,6 +41,15 @@
                                            :correct nil}))
                                  vec)})))
 
+(def no-actions-timeout (atom nil))
+
+(defn set-no-actions-timeout! []
+      (js/clearTimeout @no-actions-timeout)
+      (reset! no-actions-timeout
+              (js/setTimeout
+                (fn [] (dispatch [:flash/no-actions]))
+                5000)))
+
 (defn update-progress [state]
       (update-in state [:level :progress] + 0.1))
 
@@ -72,6 +82,10 @@
                                        choices))]
            (assoc-in state [:level :question :choices index :correct?] result)))
 
+(defn reset-character-mood [state]
+      (set-no-actions-timeout!)
+      (assoc-in state [:level :character-mood] :neutral))
+
 (defn update-character-mood [state choice-id]
       (let [prompt-id (get-in state [:level :question :prompt :id])
             correct? (= prompt-id choice-id)]
@@ -83,6 +97,13 @@
       (-> state
           (assoc :level nil)
           (assoc :view :levels)))
+
+(defn initialize [state level-id]
+      (-> state
+          (assoc :level {:id level-id
+                         :progress 0})
+          (reset-character-mood)
+          (set-new-words)))
 
 (register-handler
   :flash/back-to-levels
@@ -100,14 +121,13 @@
                                                (not= id level-id)))
                                second)]
            (if next-level-id
-             (set-level state next-level-id)
+             (initialize state next-level-id)
              (back-to-levels state)))))
-
 
 (register-handler
   :flash/reset-character-mood
   (fn [state _]
-      (assoc-in state [:level :character-mood] :neutral)))
+      (reset-character-mood state)))
 
 (register-handler
   :flash/guess
@@ -117,3 +137,13 @@
           (update-character-mood choice-id)
           (update-when-correct choice-id)
           (maybe-set-win-state))))
+
+(register-handler
+  :flash/no-actions
+  (fn [state _]
+      (assoc-in state [:level :character-mood] :waiting)))
+
+(register-handler
+  :flash/initialize
+  (fn [state [_ level-id]]
+      (initialize state level-id)))
