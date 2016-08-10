@@ -22,7 +22,10 @@
                     {:background-image (str "url(/episodes/" (str @character-sprite) "/char_angry.png)")}]
 
                    [:&.happy
-                    {:background-image (str "url(/episodes/" (str @character-sprite) "/char_happy.png)")}]]
+                    {:background-image (str "url(/episodes/" (str @character-sprite) "/char_happy.png)")}]
+
+                   [:&.waiting
+                    {:background-image (str "url(/episodes/" (str @character-sprite) "/char_time.png)")}]]
 
                   [:.game.flash
 

@@ -32,6 +32,7 @@
           [:div.character {:class (case @character-mood
                                         :angry "angry"
                                         :happy "happy"
+                                        :waiting "waiting"
                                         :neutral "neutral")}])))
 
 (defn level-view []
@@ -49,5 +50,3 @@
                         :back-to-levels :memory/back-to-levels
                         :next-level :memory/next-level}]
              [level-view])])))
-
-(dispatch [:memory/initialize])

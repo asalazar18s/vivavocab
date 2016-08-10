@@ -1,5 +1,5 @@
 (ns vivavocab.games.memory.handlers
-  (:require [re-frame.core :refer [register-handler]]))
+  (:require [re-frame.core :refer [register-handler dispatch]]))
 
 (defn generate-list [state]
       (let [cards (->> state
@@ -29,14 +29,15 @@
                        )]
            cards))
 
-(defn initialize [state]
-      (assoc-in state [:game] {:cards (generate-list state)
-                               :character-mood :neutral}))
 
-(register-handler
-  :memory/initialize
-  (fn [state _]
-      (initialize state)))
+(def no-actions-timeout (atom nil))
+
+(defn set-no-actions-timeout! []
+      (js/clearTimeout @no-actions-timeout)
+      (reset! no-actions-timeout
+              (js/setTimeout
+                (fn [] (dispatch [:memory/no-actions]))
+                5000)))
 
 (defn flipped-cards [state]
       (->> (get-in state [:game :cards])
@@ -50,9 +51,11 @@
               (:word-id (last flipped-cards)))))
 
 (defn reset-character-mood [state]
+      (set-no-actions-timeout!)
       (assoc-in state [:game :character-mood] :neutral))
 
 (defn update-character-mood [state]
+      (set-no-actions-timeout!)
       (assoc-in state [:game :character-mood] (if (= (count (flipped-cards state)) 2)
                                                 (if (cards-match? state)
                                                   :happy
@@ -88,6 +91,12 @@
                  (reset-character-mood))
              state))
 
+(defn initialize [state]
+      (-> state
+          (assoc :view :memory-game)
+          (assoc-in [:game] {:cards (generate-list state)})
+          (reset-character-mood)))
+
 (register-handler
   :memory/check-choices
   (fn [state _]
@@ -116,3 +125,13 @@
   (fn [state _]
       ; TODO
       ))
+
+(register-handler
+  :memory/no-actions
+  (fn [state _]
+      (assoc-in state [:game :character-mood] :waiting)))
+
+(register-handler
+  :memory/initialize
+  (fn [state _]
+      (initialize state)))

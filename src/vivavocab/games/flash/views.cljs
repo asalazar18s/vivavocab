@@ -54,6 +54,7 @@
                  (case @mood
                        :happy "happy"
                        :angry "angry"
+                       :waiting "waiting"
                        :neutral "")}])))
 
 (defn floor-view[]
