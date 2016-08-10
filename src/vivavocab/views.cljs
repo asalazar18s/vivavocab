@@ -1,10 +1,8 @@
  (ns vivavocab.views
    (:require [re-frame.core :refer [dispatch subscribe]]
              [vivavocab.styles :as styles]
-             [vivavocab.games.flash.views :refer [game-view]]
-             [vivavocab.games.flash.styles :as flash]
-             [vivavocab.games.memory.views :as memory]
-             [vivavocab.games.common.views :refer [win-view]]))
+             [vivavocab.games.flash.views :as flash]
+             [vivavocab.games.memory.views :as memory]))
 
 (defn level-view [level-id]
       (let [level (subscribe [:level level-id])]
@@ -25,15 +23,11 @@
                                                  (dispatch [:go-to-memory-game]))}]])))
 
 (defn app-view []
-      (let [level (subscribe [:view])]
+      (let [view (subscribe [:view])]
            (fn []
                [:div.app
                 [styles/styles-view]
-                [flash/styles-view]
-                (case @level
+                (case @view
                       :levels [levels-view]
                       :memory-game [memory/game-view]
-                      :game-end [win-view {:retry :flash/retry
-                                           :back-to-levels :flash/back-to-levels
-                                           :next-level :flash/next-level}]
-                      :game [game-view])])))
+                      :flash-game [flash/game-view])])))

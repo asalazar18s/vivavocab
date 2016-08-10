@@ -67,7 +67,6 @@
             level-id (get-in state [:level :id])]
            (if (> progress 1.0)
              (-> state
-                 (assoc :view :game-end)
                  (assoc :level {:id level-id
                                 :stars 0}))
              state)))
@@ -100,7 +99,7 @@
 
 (defn initialize [state level-id]
       (-> state
-          (assoc :view :game)
+          (assoc :view :flash-game)
           (assoc :level {:id level-id
                          :progress 0})
           (reset-character-mood)

@@ -38,3 +38,8 @@
   :flash/character-mood
   (fn [state _]
       (reaction (get-in @state [:level :character-mood]))))
+
+(register-sub
+  :flash/game-over?
+  (fn [state _]
+      (reaction (not (nil? (get-in @state [:level :stars]))))))
