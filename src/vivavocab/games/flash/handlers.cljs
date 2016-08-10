@@ -67,7 +67,6 @@
             level-id (get-in state [:level :id])]
            (if (> progress 1.0)
              (-> state
-                 (assoc :view :game-end)
                  (assoc :level {:id level-id
                                 :stars 0}))
              state)))

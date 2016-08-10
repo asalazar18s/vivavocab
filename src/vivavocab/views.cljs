@@ -33,5 +33,5 @@
                 (case @level
                       :levels [levels-view]
                       :memory-game [memory/game-view]
-                      :game-end [game-view] ; TODO remove this
-                      :game [game-view])])))
+                      :game [game-view] ;TODO change this to :flash-game
+                      )])))

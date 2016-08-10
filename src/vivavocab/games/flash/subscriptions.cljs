@@ -42,4 +42,4 @@
 (register-sub
   :flash/game-over?
   (fn [state _]
-      (reaction (= :game-end (get-in @state [:view])))))
+      (reaction (not (nil? (get-in @state [:level :stars]))))))
