@@ -1,6 +1,7 @@
  (ns vivavocab.views
    (:require [re-frame.core :refer [dispatch subscribe]]
              [vivavocab.styles :as styles]
+             [vivavocab.games.common.styles :as common-styles]
              [vivavocab.games.flash.views :as flash]
              [vivavocab.games.memory.views :as memory]))
 
@@ -27,6 +28,7 @@
            (fn []
                [:div.app
                 [styles/styles-view]
+                [common-styles/styles-view]
                 (case @view
                       :levels [levels-view]
                       :memory-game [memory/game-view]

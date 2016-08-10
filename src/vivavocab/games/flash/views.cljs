@@ -2,7 +2,7 @@
   (:require [re-frame.core :refer [dispatch subscribe]]
             [reanimated.core :as anim]
             [vivavocab.games.flash.styles :refer [styles-view]]
-            [vivavocab.games.common.views :refer [win-view]]))
+            [vivavocab.games.common.views :refer [win-view back-button-view]]))
 
 (def timeout (atom nil))
 
@@ -61,11 +61,6 @@
       (fn []
           [:div.floor]))
 
-(defn back-button-view []
-      (fn []
-          [:div.back-button
-           {:on-click (fn [_]
-                          (dispatch [:flash/back-to-levels]))}]))
 
 (defn level-view []
       (fn []
@@ -73,7 +68,7 @@
            [:div.background]
            [character-view]
            [progress-bar-view]
-           [back-button-view]
+           [back-button-view :flash/back-to-levels]
            [prompt-view]
            [floor-view]
            [choices-view]]))

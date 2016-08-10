@@ -29,12 +29,6 @@
 
                   [:.game.flash
 
-                   [:.back-button
-                    {:position "absolute"
-                     :width "50px"
-                     :height "50px"
-                     :background "red"}]
-
                    [:.floor
                     {:position "absolute"
                      :background-image (str "url(/episodes/" (str @character-sprite) "/floor.png)")

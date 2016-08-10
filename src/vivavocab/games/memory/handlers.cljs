@@ -123,8 +123,7 @@
 (register-handler
   :memory/back-to-levels
   (fn [state _]
-      ; TODO
-      ))
+      (assoc-in state [:view] :levels)))
 
 (register-handler
   :memory/no-actions

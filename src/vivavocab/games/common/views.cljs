@@ -1,12 +1,10 @@
 (ns vivavocab.games.common.views
   (:require [re-frame.core :refer [dispatch subscribe]]
-            [reanimated.core :as anim]
-            [vivavocab.games.common.styles :refer [styles-view]]))
+            [reanimated.core :as anim]))
 
 (defn win-view [{:keys [back-to-levels retry next-level]}]
       (fn []
           [:div.win-view
-           [styles-view]
            [:div.character]
            [:div.bubble
             [:div.stars
@@ -21,3 +19,8 @@
                                       (dispatch [back-to-levels]))}]
             [:div.next {:on-click (fn [_]
                                       (dispatch [next-level]))}]]]))
+
+(defn back-button-view [dispatcher-name]
+          [:div.back-button
+           {:on-click (fn [_]
+                          (dispatch [dispatcher-name]))}])
