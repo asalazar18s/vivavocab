@@ -2,7 +2,6 @@
    (:require [re-frame.core :refer [dispatch subscribe]]
              [vivavocab.styles :as styles]
              [vivavocab.games.flash.views :refer [game-view]]
-             [vivavocab.games.flash.styles :as flash]
              [vivavocab.games.memory.views :as memory]
              [vivavocab.games.common.views :refer [win-view]]))
 
@@ -29,7 +28,6 @@
            (fn []
                [:div.app
                 [styles/styles-view]
-                [flash/styles-view] ; TODO move this into flash.views
                 (case @level
                       :levels [levels-view]
                       :memory-game [memory/game-view]

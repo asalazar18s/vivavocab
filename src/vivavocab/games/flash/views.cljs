@@ -82,6 +82,7 @@
       (let [game-over (subscribe [:flash/game-over?])]
       (fn []
           [:div.game.flash
+           [styles-view]
            (if @game-over
              [win-view {:retry :flash/retry
                         :back-to-levels :flash/back-to-levels
