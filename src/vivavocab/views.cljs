@@ -1,7 +1,7 @@
  (ns vivavocab.views
    (:require [re-frame.core :refer [dispatch subscribe]]
              [vivavocab.styles :as styles]
-             [vivavocab.games.flash.views :refer [game-view]]
+             [vivavocab.games.flash.views :as flash]
              [vivavocab.games.memory.views :as memory]
              [vivavocab.games.common.views :refer [win-view]]))
 
@@ -31,5 +31,5 @@
                 (case @level
                       :levels [levels-view]
                       :memory-game [memory/game-view]
-                      :game [game-view] ;TODO change this to :flash-game
+                      :game [flash/game-view] ;TODO change this to :flash-game
                       )])))
