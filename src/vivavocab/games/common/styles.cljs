@@ -6,6 +6,12 @@
       (fn []
           [:style
            (garden/css
+             [:.back-button
+              {:position "absolute"
+               :width "50px"
+               :height "50px"
+               :background "red"}]
+
              [:.win-view
               {:height           "100%"
                :width            "100%"

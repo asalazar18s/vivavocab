@@ -2,7 +2,7 @@
   (:require [re-frame.core :refer [dispatch subscribe]]
             [reanimated.core :as anim]
             [vivavocab.games.memory.styles :refer [styles-view]]
-            [vivavocab.games.common.views :refer [win-view]]))
+            [vivavocab.games.common.views :refer [win-view back-button-view]]))
 
 (def timeout (atom nil))
 
@@ -35,9 +35,11 @@
                                         :waiting "waiting"
                                         :neutral "neutral")}])))
 
+
 (defn level-view []
       [:div
        [styles-view]
+       [back-button-view :memory/back-to-levels]
        [character-view]
        [cards-view]])
 
