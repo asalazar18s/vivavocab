@@ -30,26 +30,22 @@
   (fn [state _]
       (merge state initial-state)))
 
-(defn set-level [state level-id]
-      (dispatch [:flash/initialize level-id])
-      (-> state
-          (assoc :view :game)))
-
 (register-handler
   :choose-level
   (fn [state [_ level-id]]
-      (set-level state level-id)))
+      (dispatch [:flash/initialize level-id])
+      state))
 
 (register-handler
   :go-to-memory-game
   (fn [state _]
       (dispatch [:memory/initialize])
-      (-> state
-          (assoc :view :memory-game))))
+      state))
 
 (register-handler
   :retry
   (fn [state _]
       (let [level-id (get-in state [:level :id])]
-           (set-level state level-id))))
+           (dispatch [:flash/initialize level-id])
+           state)))
 

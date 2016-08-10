@@ -93,7 +93,8 @@
 
 (defn initialize [state]
       (-> state
-          (assoc-in  [:game] {:cards (generate-list state)})
+          (assoc :view :memory-game)
+          (assoc-in [:game] {:cards (generate-list state)})
           (reset-character-mood)))
 
 (register-handler

@@ -100,6 +100,7 @@
 
 (defn initialize [state level-id]
       (-> state
+          (assoc :view :game)
           (assoc :level {:id level-id
                          :progress 0})
           (reset-character-mood)
