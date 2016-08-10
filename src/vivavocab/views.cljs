@@ -29,11 +29,9 @@
            (fn []
                [:div.app
                 [styles/styles-view]
-                [flash/styles-view]
+                [flash/styles-view] ; TODO move this into flash.views
                 (case @level
                       :levels [levels-view]
                       :memory-game [memory/game-view]
-                      :game-end [win-view {:retry :flash/retry
-                                           :back-to-levels :flash/back-to-levels
-                                           :next-level :flash/next-level}]
+                      :game-end [game-view] ; TODO remove this
                       :game [game-view])])))

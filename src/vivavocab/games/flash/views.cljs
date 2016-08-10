@@ -67,9 +67,9 @@
            {:on-click (fn [_]
                           (dispatch [:flash/back-to-levels]))}]))
 
-(defn game-view []
+(defn level-view []
       (fn []
-          [:div.game.flash
+          [:div
            [:div.background]
            [character-view]
            [progress-bar-view]
@@ -77,3 +77,13 @@
            [prompt-view]
            [floor-view]
            [choices-view]]))
+
+(defn game-view []
+      (let [game-over (subscribe [:flash/game-over?])]
+      (fn []
+          [:div.game.flash
+           (if @game-over
+             [win-view {:retry :flash/retry
+                        :back-to-levels :flash/back-to-levels
+                        :next-level :flash/next-level}]
+             [level-view])])))
