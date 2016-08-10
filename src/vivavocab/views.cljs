@@ -23,11 +23,11 @@
                                                  (dispatch [:go-to-memory-game]))}]])))
 
 (defn app-view []
-      (let [level (subscribe [:view])]
+      (let [view (subscribe [:view])]
            (fn []
                [:div.app
                 [styles/styles-view]
-                (case @level
+                (case @view
                       :levels [levels-view]
                       :memory-game [memory/game-view]
                       :game [flash/game-view] ;TODO change this to :flash-game
