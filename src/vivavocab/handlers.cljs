@@ -42,10 +42,5 @@
       (dispatch [:memory/initialize])
       state))
 
-(register-handler
-  :retry
-  (fn [state _]
-      (let [level-id (get-in state [:level :id])]
-           (dispatch [:flash/initialize level-id])
-           state)))
+
 

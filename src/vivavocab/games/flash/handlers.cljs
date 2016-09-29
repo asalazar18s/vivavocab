@@ -147,3 +147,10 @@
   :flash/initialize
   (fn [state [_ level-id]]
       (initialize state level-id)))
+
+(register-handler
+  :flash/retry
+  (fn [state _]
+      (let [level-id (get-in state [:level :id])]
+           (dispatch [:flash/initialize level-id])
+           state)))
