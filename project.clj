@@ -1,5 +1,10 @@
 (defproject vivavocab "0.0.1"
-  :dependencies [[org.clojure/clojure "1.8.0"]
+  :dependencies [; server
+                 [org.clojure/clojure "1.8.0"]
+                 [http-kit "2.1.18"]
+                 [compojure "1.5.1"]
+
+                 ; client
                  [org.clojure/clojurescript "1.9.36"]
                  [re-frame "0.7.0"]
                  [garden "1.3.2"]
@@ -10,10 +15,14 @@
 
   :figwheel {:server-port 3499}
 
+  :source-paths ["src/server"]
+
+  :main vivavocab.core
+
   :cljsbuild {:builds
               [{:id "dev"
                 :figwheel {:on-jsload "vivavocab.core/reload"}
-                :source-paths ["src"]
+                :source-paths ["src/client"]
                 :compiler {:main vivavocab.core
                            :asset-path "/js/dev"
                            :output-to "resources/public/js/dev.js"
