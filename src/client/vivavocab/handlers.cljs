@@ -1,6 +1,7 @@
 (ns vivavocab.handlers
   (:require [re-frame.core :refer [register-handler dispatch]]
-            [vivavocab.games.flash.handlers :refer [set-new-words]]))
+            [vivavocab.games.flash.handlers :refer [set-new-words]]
+            [ajax.core :refer [GET]]))
 
 (def initial-state
   {:episodes {123 {:id 123 :character-sprite "teacher" :level-ids [3]}
@@ -29,6 +30,13 @@
   :initialize
   (fn [state _]
       (merge state initial-state)))
+
+(register-handler
+  :get-data
+  (fn [state _]
+      (GET "/api/data" {:handler (fn [data]
+                                     (println data))})
+      state))
 
 (register-handler
   :choose-level

@@ -11,7 +11,11 @@
                     io/resource
                     io/file
                     slurp))
-           (GET "/api/data" [] ) ;TODO return game data
+           (GET "/api/data" []
+                (-> "data.edn"
+                    io/resource
+                    io/file
+                    slurp))
            (route/resources "/")
            (route/not-found "<h1>Page not found</h1>"))
 
