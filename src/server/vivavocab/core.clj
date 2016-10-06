@@ -12,10 +12,11 @@
                     io/file
                     slurp))
            (GET "/api/data" []
-                (-> "data.edn"
-                    io/resource
-                    io/file
-                    slurp))
+             {:headers {"Content-Type" "application/edn"}
+              :body (-> "data.edn"
+                        io/resource
+                        io/file
+                        slurp)})
            (route/resources "/")
            (route/not-found "<h1>Page not found</h1>"))
 
