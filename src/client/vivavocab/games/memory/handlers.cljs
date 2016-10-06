@@ -1,5 +1,5 @@
 (ns vivavocab.games.memory.handlers
-  (:require [re-frame.core :refer [register-handler dispatch]]))
+  (:require [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]))
 
 (defn generate-list [state]
       (let [cards (->> state
@@ -97,12 +97,12 @@
           (assoc-in [:game] {:cards (generate-list state)})
           (reset-character-mood)))
 
-(register-handler
+(reg-event-db
   :memory/check-choices
   (fn [state _]
       (check-choices state)))
 
-(register-handler
+(reg-event-db
   :memory/flip-card
   (fn [state [_ card]]
       (-> state
@@ -110,27 +110,27 @@
           (flip-card-front (card :index))
           (update-character-mood))))
 
-(register-handler
+(reg-event-db
   :memory/retry
   (fn [state _]
       (initialize state)))
 
-(register-handler
+(reg-event-db
   :memory/next-level
   (fn [state _]
       (initialize state)))
 
-(register-handler
+(reg-event-db
   :memory/back-to-levels
   (fn [state _]
       (assoc-in state [:view] :levels)))
 
-(register-handler
+(reg-event-db
   :memory/no-actions
   (fn [state _]
       (assoc-in state [:game :character-mood] :waiting)))
 
-(register-handler
+(reg-event-db
   :memory/initialize
   (fn [state _]
       (initialize state)))

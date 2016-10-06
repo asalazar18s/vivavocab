@@ -1,5 +1,5 @@
 (ns vivavocab.games.flash.handlers
-  (:require [re-frame.core :refer [register-handler dispatch]]
+  (:require [re-frame.core :refer [reg-event-db reg-event-fx]]
             [vivavocab.helpers :refer [get-episode-id]]))
 
 (defn set-new-words [state]
@@ -105,12 +105,12 @@
           (reset-character-mood)
           (set-new-words)))
 
-(register-handler
+(reg-event-db
   :flash/back-to-levels
   (fn [state _]
       (back-to-levels state)))
 
-(register-handler
+(reg-event-db
   :flash/next-level
   (fn [state _]
       (let [level-id (get-in state [:level :id])
@@ -124,12 +124,12 @@
              (initialize state next-level-id)
              (back-to-levels state)))))
 
-(register-handler
+(reg-event-db
   :flash/reset-character-mood
   (fn [state _]
       (reset-character-mood state)))
 
-(register-handler
+(reg-event-db
   :flash/guess
   (fn [state [_ choice-id]]
       (-> state
@@ -138,19 +138,17 @@
           (update-when-correct choice-id)
           (maybe-set-win-state))))
 
-(register-handler
+(reg-event-db
   :flash/no-actions
   (fn [state _]
       (assoc-in state [:level :character-mood] :waiting)))
 
-(register-handler
+(reg-event-db
   :flash/initialize
   (fn [state [_ level-id]]
       (initialize state level-id)))
 
-(register-handler
+(reg-event-fx
   :flash/retry
-  (fn [state _]
-      (let [level-id (get-in state [:level :id])]
-           (dispatch [:flash/initialize level-id])
-           state)))
+  (fn [{state :db} _]
+    {:dispatch [:flash/initialize (get-in state [:level :id])]}))

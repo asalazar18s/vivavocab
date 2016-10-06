@@ -30,8 +30,8 @@
 
 (reg-event-fx
   :initialize
-  (fn [{db :db} _]
-    {:db (merge db initial-state)
+  (fn [{state :db} _]
+    {:db (merge state initial-state)
      :dispatch [:fetch-data]}))
 
 (reg-event-fx
