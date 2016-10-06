@@ -1,8 +1,20 @@
 (ns vivavocab.handlers
-  (:require [re-frame.core :refer [register-handler dispatch]]
+  (:require [re-frame.core :refer [reg-event-db reg-event-fx reg-fx dispatch]]
             [vivavocab.games.flash.handlers :refer [set-new-words]]
             [ajax.core :refer [ajax-request]]
             [ajax.edn :refer [edn-response-format]]))
+
+(defn key-by-id [items]
+  (reduce (fn [memo item]
+            (assoc memo (item :id) item)) {} items))
+
+(reg-fx :ajax
+        (fn [args]
+          (ajax-request {:uri (args :uri)
+                         :method (args :method)
+                         :response-format (edn-response-format)
+                         :handler (fn [[_ data]]
+                                    (dispatch [(args :dispatch) data]))})))
 
 (def initial-state
   {:episodes []
@@ -16,21 +28,20 @@
    :level {:level-id 3
            :stars 0}})
 
-(defn key-by-id [items]
-  (reduce (fn [memo item]
-            (assoc memo (item :id) item)) {} items))
-
-(register-handler
+(reg-event-fx
   :initialize
-  (fn [state _]
-    (ajax-request {:uri "/api/data"
-                   :method :get
-                   :response-format (edn-response-format)
-                   :handler (fn [[_ data]]
-                              (dispatch [:process-data data]))})
-    (merge state initial-state)))
+  (fn [{db :db} _]
+    {:db (merge db initial-state)
+     :dispatch [:fetch-data]}))
 
-(register-handler
+(reg-event-fx
+  :fetch-data
+  (fn [_ _]
+    {:ajax {:uri "/api/data"
+            :method :get
+            :dispatch :process-data}}))
+
+(reg-event-db
   :process-data
   (fn [state [_ data]]
     (assoc state
@@ -38,17 +49,15 @@
       :levels (key-by-id (data :levels))
       :words (key-by-id (data :words)))))
 
-(register-handler
+(reg-event-fx
   :choose-level
-  (fn [state [_ level-id]]
-      (dispatch [:flash/initialize level-id])
-      state))
+  (fn [_ [_ level-id]]
+    {:dispatch [:flash/initialize level-id]}))
 
-(register-handler
+(reg-event-fx
   :go-to-memory-game
-  (fn [state _]
-      (dispatch [:memory/initialize])
-      state))
+  (fn [_ _]
+    {:dispatch [:memory/initialize]}))
 
 
 
