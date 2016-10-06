@@ -22,11 +22,11 @@
 (defonce server (atom nil))
 
 (defn start! [port]
-      (println "Starting web server on port" port)
-      (reset! server (run-server #'app {:port port})))
-
-(defn stop! []
-      (@server))
+  (when @server
+    (@server))
+  (println "Starting web server on port" port)
+  (reset! server (run-server #'app {:port port}))
+  nil)
 
 (defn -main  [& args]
       (let [port (Integer/parseInt (first args))]
