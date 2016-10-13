@@ -9,13 +9,17 @@
 
 (enable-console-print!)
 
-(defn ^:export run
+(defn render
       []
-      (dispatch-sync [:initialize])
       (r/render
         [views/app-view]
         (js/document.getElementById "app")))
 
+(defn ^:export run
+      []
+      (dispatch-sync [:initialize])
+      (render))
+
 (defn ^:export reload
       []
-      (run))
+      (render))
