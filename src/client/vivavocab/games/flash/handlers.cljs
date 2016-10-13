@@ -1,5 +1,5 @@
 (ns vivavocab.games.flash.handlers
-  (:require [re-frame.core :refer [reg-event-db reg-event-fx]]
+  (:require [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]
             [vivavocab.helpers :refer [get-episode-id]]))
 
 (defn set-new-words [state]
