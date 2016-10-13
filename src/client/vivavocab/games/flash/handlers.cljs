@@ -3,7 +3,11 @@
             [vivavocab.helpers :refer [get-episode-id]]))
 
 (defn set-new-words [state]
-      (let [word-count 4
+      (let [progress (get-in state [:level :progress])
+            word-count (cond
+                         (< progress 0.33) 2
+                         (< progress 0.66) 3
+                         :else 4)
             level-id (get-in state [:level :id])
             previous-prompt-id (get-in state [:level :question :prompt :id])
             prompt-id (-> (get-in state [:levels level-id :word-ids])
